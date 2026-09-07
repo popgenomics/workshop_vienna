@@ -1,0 +1,129 @@
+column	table	role	description
+migration_status	reference_summary_statistics / reference_parameters	metadata	Hierarchical class used by the first DILS comparison: 'migration' for IM and SC (ongoing gene flow), 'isolation' for AM and SI (no ongoing gene flow).
+genomic_migration	reference_summary_statistics / reference_parameters	metadata	Whether migration is homogeneous (1M) or heterogeneous (2M) across the genome. NA for SI because SI has no migration parameter.
+genomic_Ne	reference_summary_statistics / reference_parameters	metadata	Whether effective population size is homogeneous (1N) or heterogeneous (2N) across loci.
+scenario	reference_summary_statistics / reference_parameters	metadata	Demographic scenario: AM, IM, SC or SI.
+model	reference_summary_statistics / reference_parameters	metadata	Complete DILS elementary model, without the batch number, for example SC_2M_1N or SI_2N.
+simulation_id	reference_summary_statistics / reference_parameters	metadata	Stable unique identifier built as model, two-digit batch and six-digit row_in_batch, for example SC_2M_1N_04_000001.
+batch	reference_summary_statistics / reference_parameters	metadata	Replication number of the DILS simulation directory, an integer from 0 to 4.
+row_in_batch	reference_summary_statistics / reference_parameters	metadata	1-based row index of the multilocus simulation inside its batch files. Rows are paired by position across ABCstat.txt, ABCjsfs.txt and priorfile.txt.
+SI	concept	biological_class	Strict isolation: an ancestral population splits at Tsplit and the daughter populations never exchange genes afterwards.
+AM	concept	biological_class	Ancestral migration: the daughter populations exchange genes after the split, then isolation begins at Tam. There is no ongoing migration, so AM belongs to the isolation class, but 1M/2M still describe ancient migration.
+IM	concept	biological_class	Isolation with migration: the daughter populations exchange genes continuously from the split until the present.
+SC	concept	biological_class	Secondary contact: the daughter populations first evolve in isolation, then resume gene exchange at Tsc.
+1M	concept	biological_class	Homogeneous genomic migration: all loci share the same migration rate in a given direction.
+2M	concept	biological_class	Heterogeneous genomic migration under the bimodal barrier model: loci belong to two classes, one migrating at the general rate and one barrier class whose migration rate is zero. Barrier loci can differ between M12 and M21.
+1N	concept	biological_class	Homogeneous Ne: all loci share the same effective population size.
+2N	concept	biological_class	Heterogeneous Ne: effective size varies among genomic regions, which can capture linked-selection effects that reduce Ne locally.
+bialsites_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean number of biallelic sites per locus.
+bialsites_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of the number of biallelic sites across loci.
+sf_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean fraction of sites that are fixed differences between the two populations.
+sf_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of the fraction of fixed differences across loci.
+sxA_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean fraction of sites polymorphic only in population A.
+sxA_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of A-specific polymorphisms across loci.
+sxB_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean fraction of sites polymorphic only in population B.
+sxB_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of B-specific polymorphisms across loci.
+ss_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean fraction of sites with a polymorphism shared by both populations.
+ss_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of shared polymorphisms across loci.
+piA_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean pairwise nucleotide diversity (pi) in population A.
+piA_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of pi in population A across loci.
+piB_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean pairwise nucleotide diversity (pi) in population B.
+piB_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of pi in population B across loci.
+pearson_r_pi	reference_summary_statistics / observed_summary_statistics	predictor	Pearson correlation of pi between populations A and B across loci.
+thetaA_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean Watterson's theta in population A.
+thetaA_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of Watterson's theta in population A across loci.
+thetaB_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean Watterson's theta in population B.
+thetaB_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of Watterson's theta in population B across loci.
+pearson_r_theta	reference_summary_statistics / observed_summary_statistics	predictor	Pearson correlation of Watterson's theta between populations A and B across loci.
+DtajA_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean Tajima's D in population A.
+DtajA_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of Tajima's D in population A across loci.
+DtajB_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean Tajima's D in population B.
+DtajB_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of Tajima's D in population B across loci.
+divAB_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean raw divergence Dxy between populations A and B.
+divAB_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of raw divergence Dxy across loci.
+netdivAB_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean net divergence Da = Dxy - (piA + piB) / 2.
+netdivAB_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of net divergence Da across loci.
+FST_avg	reference_summary_statistics / observed_summary_statistics	predictor	Mean FST, measured as 1 - piS / piT.
+FST_std	reference_summary_statistics / observed_summary_statistics	predictor	Standard deviation of FST across loci.
+fA0_fB1	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 0 in population A and allele count 1 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA0_fB2	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 0 in population A and allele count 2 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA0_fB3	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 0 in population A and allele count 3 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA0_fB4	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 0 in population A and allele count 4 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA0_fB5	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 0 in population A and allele count 5 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA0_fB6	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 0 in population A and allele count 6 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA1_fB0	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 1 in population A and allele count 0 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA1_fB1	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 1 in population A and allele count 1 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA1_fB2	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 1 in population A and allele count 2 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA1_fB3	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 1 in population A and allele count 3 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA1_fB4	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 1 in population A and allele count 4 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA1_fB5	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 1 in population A and allele count 5 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA1_fB6	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 1 in population A and allele count 6 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA2_fB0	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 2 in population A and allele count 0 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA2_fB1	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 2 in population A and allele count 1 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA2_fB2	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 2 in population A and allele count 2 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA2_fB3	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 2 in population A and allele count 3 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA2_fB4	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 2 in population A and allele count 4 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA2_fB5	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 2 in population A and allele count 5 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA2_fB6	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 2 in population A and allele count 6 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA3_fB0	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 3 in population A and allele count 0 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA3_fB1	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 3 in population A and allele count 1 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA3_fB2	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 3 in population A and allele count 2 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA3_fB3	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 3 in population A and allele count 3 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA3_fB4	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 3 in population A and allele count 4 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA3_fB5	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 3 in population A and allele count 5 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA3_fB6	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 3 in population A and allele count 6 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA4_fB0	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 4 in population A and allele count 0 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA4_fB1	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 4 in population A and allele count 1 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA4_fB2	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 4 in population A and allele count 2 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA4_fB3	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 4 in population A and allele count 3 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA4_fB4	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 4 in population A and allele count 4 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA4_fB5	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 4 in population A and allele count 5 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA4_fB6	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 4 in population A and allele count 6 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA5_fB0	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 5 in population A and allele count 0 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA5_fB1	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 5 in population A and allele count 1 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA5_fB2	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 5 in population A and allele count 2 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA5_fB3	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 5 in population A and allele count 3 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA5_fB4	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 5 in population A and allele count 4 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA5_fB5	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 5 in population A and allele count 5 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA5_fB6	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 5 in population A and allele count 6 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA6_fB0	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 6 in population A and allele count 0 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA6_fB1	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 6 in population A and allele count 1 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA6_fB2	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 6 in population A and allele count 2 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA6_fB3	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 6 in population A and allele count 3 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA6_fB4	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 6 in population A and allele count 4 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA6_fB5	reference_summary_statistics / observed_summary_statistics	predictor	Joint site frequency spectrum cell: number of SNPs with allele count 6 in population A and allele count 5 in population B. Values are copied from ABCjsfs.txt without transformation.
+fA0_fB0	not_used	excluded_jsfs_cell	Monomorphic jSFS cell (allele count 0 in both populations). It contains no SNP and is removed from the workshop tables.
+fA6_fB6	not_used	excluded_jsfs_cell	Monomorphic jSFS cell (allele count nMin in both populations). It contains no SNP and is removed from the workshop tables.
+N1	reference_parameters	parameter	Effective size of population A, as stored in DILS priorfile.txt (scaled simulator units, not converted to individuals).
+N2	reference_parameters	parameter	Effective size of population B, as stored in DILS priorfile.txt (scaled simulator units, not converted to individuals).
+Na	reference_parameters	parameter	Effective size of the ancestral population, as stored in DILS priorfile.txt (scaled simulator units).
+founders1	reference_parameters	parameter	Relative size of population A after its demographic change (founder size), as stored in DILS priorfile.txt.
+founders2	reference_parameters	parameter	Relative size of population B after its demographic change (founder size), as stored in DILS priorfile.txt.
+Tdem1	reference_parameters	parameter	Time of the demographic change in population A, as stored in DILS priorfile.txt (scaled simulator units).
+Tdem2	reference_parameters	parameter	Time of the demographic change in population B, as stored in DILS priorfile.txt (scaled simulator units).
+shape_N_a	reference_parameters	parameter	First shape parameter of the Beta distribution used when Ne varies among loci (2N models only).
+shape_N_b	reference_parameters	parameter	Second shape parameter of the Beta distribution used when Ne varies among loci (2N models only).
+Tsplit	reference_parameters	parameter	Split time of the ancestral population, as stored in DILS priorfile.txt (scaled simulator units).
+Tam	reference_parameters	parameter	Time at which ancestral migration stops under AM, as stored in DILS priorfile.txt. Missing (NA) in non-AM models.
+Tsc	reference_parameters	parameter	Time of secondary contact under SC, as stored in DILS priorfile.txt. Missing (NA) in non-SC models.
+M12	reference_parameters	parameter	Migration rate from population B to population A, as stored in DILS priorfile.txt. Missing (NA) under SI.
+nBarriersM12	reference_parameters	parameter	Number of loci whose migration rate from B to A is zero under 2M (bimodal barriers). Missing (NA) under 1M and SI.
+M21	reference_parameters	parameter	Migration rate from population A to population B, as stored in DILS priorfile.txt. Missing (NA) under SI.
+nBarriersM21	reference_parameters	parameter	Number of loci whose migration rate from A to B is zero under 2M (bimodal barriers). Missing (NA) under 1M and SI.
+origin	goodness_of_fit_data	metadata	Source of the summary-statistic vector: observed empirical dataset, prior-predictive simulation, or posterior-predictive simulation.
+fitted_model	goodness_of_fit_data	metadata	Elementary DILS model used to generate the predictive simulations. Every row in this table uses SC_2M_2N.
+dataset_id	goodness_of_fit_data	metadata	Unique identifier: 'observed' for the empirical row, prior_BB_RRRR for prior-predictive simulations, posterior_BB_RRRR for posterior-predictive simulations.
+batch	goodness_of_fit_data	metadata	Replication number of the predictive batch, an integer from 0 to 9. NA for the observed row.
+row_in_batch	goodness_of_fit_data	metadata	1-based row index inside the predictive batch files. NA for the observed row.
+observed	concept	goodness_of_fit	Empirical summary statistics computed on the real dataset.
+prior_predictive	concept	goodness_of_fit	Simulations produced under SC_2M_2N by drawing parameters from the prior.
+posterior_predictive	concept	goodness_of_fit	Simulations produced under SC_2M_2N by drawing parameters from the estimated posterior.
+origin	locus_model_choice_data	metadata	Source of the monolocus summary-statistic vector: training simulation with migration, training simulation with isolation, or observed locus.
+fitted_model	locus_model_choice_data	metadata	Elementary DILS model whose posterior was used to simulate the monolocus training table. Every row uses SC_2M_2N.
+dataset_id	locus_model_choice_data	metadata	Unique row identifier: training_migration_NNNNNN, training_isolation_NNNNNN, or observed_locus_<locus name>.
+locus_id	locus_model_choice_data	metadata	Original locus name from ABCstat_loci.txt. NA for training simulations.
+true_class	locus_model_choice_data	metadata	Known class of a training simulation (migration or isolation). NA for observed loci, whose class is unknown.
+row_in_source	locus_model_choice_data	metadata	1-based row index in the original DILS source file.
+training_migration	concept	locus_model_choice	Monolocus simulation drawn under the selected model's posterior with non-zero migration in both directions.
+training_isolation	concept	locus_model_choice	Monolocus simulation drawn under the selected model's posterior with M12 = M21 = 0.
+observed_locus	concept	locus_model_choice	Empirical monolocus summary statistics computed on one observed locus.

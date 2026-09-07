@@ -1,0 +1,38 @@
+# Nested upstream clone and incoming archive (kept locally, not published)
+Aphid/aphid/
+Aphid/aphid.zip
+Aphid/mail.txt
+
+# Unrelated local material at this workstation
+australia/
+schedule_workshop_gene_flow.odt
+
+# DILS instructor, solutions, Quarto site, and local results
+DILS/solutions/
+DILS/instructor/
+DILS/preparation/
+DILS/teaching/
+DILS/results/
+DILS/.github/
+DILS/data/source_manifest.tsv
+DILS/.local_unpublished/
+DILS/README.pdf
+DILS/.gitignore
+DILS/README_old.md
+
+# Editor junk
+*.swp
+*~
+
+# R / Quarto / generated
+.Rhistory
+.RData
+.Rproj.user/
+**/.Rproj.user/
+.quarto/
+**/.quarto/
+**/_site/
+*.rds
+**/*.rds
+*.Rhistory
+*.RData
