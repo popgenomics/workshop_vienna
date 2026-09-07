@@ -26,4 +26,4 @@ Warnings (do not by themselves mean the DILS day is broken): R or package versio
 
 ## Student copies
 
-Each student needs a writable clone or copy. `DILS/scripts/` write under `DILS/results/`. Aphid will write under `Aphid/trees_topo/`, `Aphid/final_trees/`, and `Aphid/outputs/`.
+Each student needs a writable clone or copy. `DILS/scripts/` write under `DILS/results/`. Aphid will write under `Aphid/trees_topo/`, `Aphid/trees/`, and `Aphid/outputs/`.

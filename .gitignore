@@ -2,6 +2,16 @@
 Aphid/aphid/
 Aphid/aphid.zip
 Aphid/mail.txt
+Aphid/data/isoptera.zip
+Aphid/data/isoptera/
+Aphid/software/aphid
+prov1
+prov2
+Aphid/isoptera_*.csv
+Aphid/isoptera_genetrees.treefile
+Aphid/astral_isoptera_speciestree.tree
+Aphid/outputs/*.csv
+!Aphid/outputs/.gitkeep
 
 # Unrelated local material at this workstation
 australia/
@@ -36,3 +46,4 @@ DILS/README_old.md
 **/*.rds
 *.Rhistory
 *.RData
+__pycache__/

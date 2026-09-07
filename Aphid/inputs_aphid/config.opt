@@ -1,0 +1,24 @@
+#gene tree filtering
+require_triplet_other_monophyly = 1
+require_outgroup_monophyly = 1
+max_alphai = 10
+max_clock_ratio = 2
+triplet_clock_thresh = 0.0
+
+#likelihood calculation
+nb_ILS_times = 1
+nb_GF_times = 10
+GF_time_coeff =  0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0
+min_d = 0.00001
+strict_no_event = 0
+
+#likelihood optimisation
+max_backward_moves = 10
+max_iterations = 1000
+convergence = 0.000001
+
+#output
+posterior_threshold = 0.95
+CI_param = 0
+CI_ILS_GF = 0
+verbose = 0

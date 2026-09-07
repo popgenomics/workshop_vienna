@@ -13,9 +13,10 @@ The workshop will run on a Linux server with:
 - the R packages `tidyverse` and `abcrf`;
 - GCC;
 - IQ-TREE 3, available as `iqtree3`;
-- ASTRAL, available as `astral`.
+- ASTRAL, available as `astral`;
+- Python 3 with `pandas<=2.1.0`.
 
-The Aphid R scripts use base R and do not require additional R packages.
+Aphid post-processing requires Python 3 and `pandas<=2.1.0`. Any R scripts used for Aphid rely on base R.
 
 ## Compiling Aphid
 

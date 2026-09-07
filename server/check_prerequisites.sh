@@ -59,6 +59,44 @@ else
   fail "gcc is not available"
 fi
 
+if have_cmd python3; then
+  note "python3: $(python3 --version 2>&1)"
+else
+  fail "python3 is not available"
+fi
+
+if have_cmd python3; then
+  py_st=0
+  py_out="$(python3 - <<'PY' 2>&1
+import sys
+try:
+    import pandas as pd
+except Exception as exc:
+    sys.stderr.write("ERROR: cannot import pandas: %s\n" % exc)
+    sys.exit(2)
+print("pandas: %s" % pd.__version__)
+parts = []
+for token in pd.__version__.split("."):
+    digits = "".join(ch for ch in token if ch.isdigit())
+    parts.append(int(digits) if digits else 0)
+while len(parts) < 3:
+    parts.append(0)
+if tuple(parts[:3]) > (2, 1, 0):
+    sys.stderr.write("WARNING: pandas %s is greater than 2.1.0\n" % pd.__version__)
+    sys.exit(1)
+sys.exit(0)
+PY
+)" || py_st=$?
+  printf '%s\n' "${py_out}"
+  if [[ "${py_st}" -eq 0 ]]; then
+    note "pandas import and version check: ok"
+  elif [[ "${py_st}" -eq 2 ]]; then
+    fail "pandas is not importable"
+  else
+    warn "pandas is installed but its version is greater than 2.1.0"
+  fi
+fi
+
 arch="$(uname -m)"
 if [[ "${arch}" == "x86_64" || "${arch}" == "amd64" ]]; then
   note "Architecture: ${arch} (Linux x86-64 expected)"
@@ -85,7 +123,7 @@ if have_cmd iqtree3; then
     fi
   fi
 else
-  warn "iqtree3 is not in PATH. Required for Day 2 once Arthur's alignments are available."
+  warn "iqtree3 is not in PATH. Required for Day 2."
 fi
 
 if have_cmd astral; then

@@ -1,119 +1,163 @@
-# Aphid (Day 2)
+# Aphid
 
-Day 2 of the Vienna workshop, led by Arthur Boddaert.
+Practical analyses use an Isoptera (termite) data set, with `Empusa_pennata` as the outgroup.
 
-This folder currently contains the Aphid C program and empty destinations for data, trees, inputs, outputs, and R scripts. **The Day 2 pipeline is not reproducible from this repository yet.** Alignments, trees, Aphid input files, and workshop R scripts are still expected from Arthur.
-
-## Software
-
-| File | Role |
-| --- | --- |
-| `software/aphid.0.11.c` | Upstream source (do not edit to silence compiler warnings) |
-| `software/LICENSE` | GPL-3.0 from the upstream project |
-| `software/README_upstream.md` | Original Aphid README |
-| `software/containerize.bash` | Upstream container helper |
-| `software/aphid_precompiled_linux_x86_64_glibc_2.34` | ELF Linux x86-64 binary linked against **GLIBC_2.34**. Not a universal binary. |
-
-SHA256 (verified on copy):
-
-```
-0511e5adea40a1d81ccc913c1a9c39122d80ee84aa255b186b934a0c9eca51f5  software/aphid_precompiled_linux_x86_64_glibc_2.34
-702dbafec1b97d617b2e2cded08cf4285250dc7a32fbfff64c9afca63a4a8b02  software/aphid.0.11.c
-```
-
-Upstream clone (kept locally, not in this public repository): https://gitlab.com/iago-lito/aphid.git (tag `v0.11`).
-
-## Compile on the server
-
-Do **not** treat the precompiled binary as portable. Compile from source:
-
-```bash
-gcc -O2 -std=c11 -Wall -Wextra \
-  Aphid/software/aphid.0.11.c -lm \
-  -o Aphid/software/aphid
-```
-
-`-lm` must come **after** the source (or object) file. Compilation emits several warnings; they are expected. Do not modify Arthur's scientific C code to remove them.
-
-The original precompiled file must stay untouched. Write the server build to `Aphid/software/aphid` (a different name).
-
-With no arguments the program prints:
+## Layout
 
 ```text
-usage: aphid tree_file taxon_file option_file outfile
+Aphid/
+├── requirements.txt
+├── software/
+│   ├── aphid.0.11.c
+│   └── aphid                  # created by the compile command below
+├── data/
+│   ├── alignments/
+│   └── third_posi_codon/
+├── trees_topo/
+├── trees/
+├── inputs_aphid/
+├── outputs/
+└── scripts/
+    └── process_aphid.py
 ```
 
-It expects four arguments.
+All commands below assume the working directory is `Aphid/`.
 
-## Planned pipeline (not runnable yet)
-
-Commands below are the intended Day 2 workflow. They will fail until Arthur's files are added.
-
-### Gene-tree topology
+## Compile Aphid
 
 ```bash
-cd Aphid/data
+gcc -O2 -std=c11 software/aphid.0.11.c \
+  -lm \
+  -o software/aphid
+```
+
+## Gene-tree topology
+
+From `data/`. Replace `<locus>` by the locus name without the extension.
+
+```bash
+cd data
 
 iqtree3 \
   -s ./alignments/<locus>.fas \
   -m MFP \
-  -o Labidesthes_sicculus \
+  -o Empusa_pennata \
   -pre ../trees_topo/<locus> \
   -T AUTO \
   --threads-max 2
 ```
 
-### Branch lengths on third codon positions
+## Branch lengths on third codon positions
+
+Still from `data/`:
 
 ```bash
 iqtree3 \
   -s ./third_posi_codon/<locus>.fas \
   -te ../trees_topo/<locus>.treefile \
   -m MFP \
-  -o Labidesthes_sicculus \
-  -pre ../final_trees/<locus> \
+  -o Empusa_pennata \
+  -pre ../trees/<locus> \
   -T AUTO \
   --threads-max 2
 ```
 
-IQ-TREE may use up to two threads with these commands.
+## Concatenation
 
-### Concatenation
+From `Aphid/`:
 
 ```bash
-cat ./final_trees/*.treefile > cichlids_concated.treefile
+cat ./trees/*.treefile > isoptera_genetrees.treefile
 ```
 
-### ASTRAL
+## ASTRAL
 
 ```bash
 astral \
-  -i cichlids_concated.treefile \
-  -o cichlids_speciestree_astral.treefile
+  -i isoptera_genetrees.treefile \
+  -o astral_isoptera_speciestree.tree
 ```
 
-**Exact ASTRAL implementation and version: pending confirmation from Arthur Boddaert.** Do not assume ASTRAL-III, ASTRAL-IV, or ASTER. If the chosen tool needs Java, that dependency will be added after confirmation.
+## Aphid (verbose)
 
-### Aphid
+First triplet:
 
 ```bash
-Aphid/software/aphid \
-  ./inputs_aphid/cichlids.in \
-  ./inputs_aphid/cichlids.tax \
-  ./inputs_aphid/config_v.opt \
-  ./outputs/gene_cichlids.cichlids
+./software/aphid \
+  inputs_aphid/isoptera.in \
+  inputs_aphid/isoptera_1.tax \
+  inputs_aphid/config_v.opt \
+  outputs/isoptera_1.csv
 ```
 
-## Pending material from Arthur Boddaert
+Second triplet:
 
-- Alignments (`data/alignments/`)
-- Third-position alignments (`data/third_posi_codon/`)
-- Optional precomputed trees
-- `inputs_aphid/` files `.in`, `.tax`, and `.opt`
-- Workshop R scripts under `scripts/`
-- Exact ASTRAL implementation and version
-- Final Day 2 instructions
+```bash
+./software/aphid \
+  inputs_aphid/isoptera.in \
+  inputs_aphid/isoptera_2.tax \
+  inputs_aphid/config_v.opt \
+  outputs/isoptera_2.csv
+```
 
-## R
+## Standard (non-verbose) tables
 
-Future Aphid R scripts are assumed to use **base R only**. No extra R packages are required for Day 2 at this time.
+`config.opt` (`verbose = 0`) prints one summary line on stdout. The `option` field `basic.opt` is only a label in that table; `process_aphid.py` does not read it. The file actually used for the run is `inputs_aphid/config.opt`.
+
+First triplet:
+
+```bash
+echo "dataset,option,nb_gene,ntopo0,ntopo1,ntopo2,ntopo3,av_lg,tau1,tau1_low,tau1_high,tau2,tau2_low,tau2_high,theta,theta_low,theta_high,pab,pab_low,pab_high,pac,pac_low,pac_high,pbc,pbc_low,pbc_high,pa,pa_low,pa_high,no_event,noconflict_ILS,noconflict_GF,conflict_ILS,conflict_ILS_low,conflict_ILS_high,conflict_GF,conflict_GF_low,conflict_GF_high,imbalance_ILS,dominant_ILS,imbalance_GF,dominant_GF,max_lnL" > isoptera_1.csv
+
+./software/aphid \
+  inputs_aphid/isoptera.in \
+  inputs_aphid/isoptera_1.tax \
+  inputs_aphid/config.opt \
+  prov1 \
+  | awk '{print "inputs_aphid/isoptera_1.tax,basic.opt," $0}' >> isoptera_1.csv
+
+rm -f prov1
+```
+
+Second triplet:
+
+```bash
+echo "dataset,option,nb_gene,ntopo0,ntopo1,ntopo2,ntopo3,av_lg,tau1,tau1_low,tau1_high,tau2,tau2_low,tau2_high,theta,theta_low,theta_high,pab,pab_low,pab_high,pac,pac_low,pac_high,pbc,pbc_low,pbc_high,pa,pa_low,pa_high,no_event,noconflict_ILS,noconflict_GF,conflict_ILS,conflict_ILS_low,conflict_ILS_high,conflict_GF,conflict_GF_low,conflict_GF_high,imbalance_ILS,dominant_ILS,imbalance_GF,dominant_GF,max_lnL" > isoptera_2.csv
+
+./software/aphid \
+  inputs_aphid/isoptera.in \
+  inputs_aphid/isoptera_2.tax \
+  inputs_aphid/config.opt \
+  prov2 \
+  | awk '{print "inputs_aphid/isoptera_2.tax,basic.opt," $0}' >> isoptera_2.csv
+
+rm -f prov2
+```
+
+## Python post-processing
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+First triplet:
+
+```bash
+python3 scripts/process_aphid.py \
+  -t Isoptera \
+  --aphid_standard ./isoptera_1.csv \
+  --aphid_output ./outputs/isoptera_1.csv \
+  --output ./isoptera_processed_1.csv \
+  --times 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+```
+
+Second triplet:
+
+```bash
+python3 scripts/process_aphid.py \
+  -t Isoptera \
+  --aphid_standard ./isoptera_2.csv \
+  --aphid_output ./outputs/isoptera_2.csv \
+  --output ./isoptera_processed_2.csv \
+  --times 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+```
