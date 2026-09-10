@@ -20,6 +20,7 @@ Aphid/
 ├── outputs/
 └── scripts/
     └── process_aphid.py
+    └── plot_contributions.py
 ```
 
 All commands below assume the working directory is `Aphid/`.
@@ -62,13 +63,23 @@ iqtree3 \
   -T AUTO \
   --threads-max 2
 ```
+The scripts `1_run_iqtree_topology.sh` and `2_run_iqtree_branch_length.sh` can be used to automatically generate the gene trees:
+
+```bash
+bash scripts/1_run_iqtree_topology.sh # Used to get the topology
+bash scripts/2_run_iqtree_branch_length.sh # Used to recalculate the branch lengths
+```
+Because generating a tree for each gene is time-consuming, precomputed trees are provided:
+```bash
+tar -xzf ./trees.tar.gz
+```
 
 ## Concatenation
 
 From `Aphid/`:
 
 ```bash
-cat ./trees/*.treefile > isoptera_genetrees.treefile
+cat ./trees/*.fas.tree > isoptera_genetrees.treefile
 ```
 
 ## ASTRAL
@@ -77,6 +88,11 @@ cat ./trees/*.treefile > isoptera_genetrees.treefile
 astral \
   -i isoptera_genetrees.treefile \
   -o astral_isoptera_speciestree.tree
+```
+
+## Create Aphid input file
+```bash
+python ./scripts/aphid_infile.py --trees ./trees --alignments ./data/third_posi_codon --extension "fas" --output ./inputs_aphid/isoptera.in
 ```
 
 ## Aphid (verbose)
@@ -161,4 +177,18 @@ python3 scripts/process_aphid.py \
   --aphid_output ./outputs/isoptera_2.csv \
   --output ./isoptera_processed_2.csv \
   --times 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+```
+
+## Plotting the contribution
+
+First triplet:
+
+```bash
+Rscript scripts/plot_results.R -r ./isoptera_processed_1.csv -p ./isoptera_1_plot.pdf
+```
+
+Second triplet:
+
+```bash
+Rscript scripts/plot_results.R -r ./isoptera_processed_2.csv -p ./isoptera_2_plot.pdf
 ```
