@@ -4,6 +4,7 @@ This repository contains the material for a two-day workshop:
 
 - `DILS/`: demographic inference with DILS;
 - `Aphid/`: gene-flow analyses with Aphid.
+- `How_To_Use_LiSC.md`: Instructions for connecting to and using the LiSC server.
 
 ## Requirements
 
