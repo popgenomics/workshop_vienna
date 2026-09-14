@@ -2451,7 +2451,7 @@ margin-bottom: 1.4rem;
 <section id="sec-dice" class="level2">
 <h2 class="anchored" data-anchor-id="sec-dice">Before Mytilus: which die was drawn?</h2>
 <p>We will mainly use two R packages: tidyverse to organise and explore the data, and abcrf to compare models and estimate parameters. Two additional packages, ggdensity and ggthemes, will help us draw some of the figures.</p>
-<p>Run the code from the DILS/ directory, which contains workshop.html and the data/ folder.</p>
+<p>Run the code from the DILS directory, so that R can find the files in data/.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -4878,263 +4878,9 @@ Check your answer
 </section>
 <section id="sec-all-parameters" class="level2">
 <h2 class="anchored" data-anchor-id="sec-all-parameters">Estimates for all parameters</h2>
-<p>Here is what we obtain when we repeat the same procedure for all the parameters.</p>
-<p>Start by looking at the units and the widths of the intervals. Which parts of the history appear well constrained, and which remain uncertain?</p>
-<div class="exercise">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb198"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb198-1"><a href="#cb198-1" aria-hidden="true" tabindex="-1"></a>selected_complete_model</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] &quot;SC_2M_2N&quot;</code></pre>
-</div>
-</div>
-</div>
 <p>The founder parameters are fractions of ancestral population size. To express the corresponding founder sizes in individuals, we calculate the product in each simulation and estimate that quantity directly. Multiplying separate posterior means would not give the same result.</p>
-<details class="check-answer">
-<summary>
-Show the code used to build this table
-</summary>
-<div class="exercise">
-<p>Create the output directory:</p>
+<p>We can repeat the same estimation for the other parameters. The table below summarises their posterior means, medians and 95% credible intervals.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb200"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb200-1"><a href="#cb200-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(</span>
-<span id="cb200-2"><a href="#cb200-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;results/parameter_estimation&quot;</span>,</span>
-<span id="cb200-3"><a href="#cb200-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">recursive =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb200-4"><a href="#cb200-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">showWarnings =</span> <span class="cn">FALSE</span></span>
-<span id="cb200-5"><a href="#cb200-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div class="exercise">
-<p>Compute founder sizes in each simulation:</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb201"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb201-1"><a href="#cb201-1" aria-hidden="true" tabindex="-1"></a>best_model_founder <span class="ot">=</span> best_model_all <span class="sc">%&gt;%</span></span>
-<span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb201-3"><a href="#cb201-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">founder_size_1 =</span> founders1 <span class="sc">*</span> Na <span class="sc">*</span> N_ref,</span>
-<span id="cb201-4"><a href="#cb201-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">founder_size_2 =</span> founders2 <span class="sc">*</span> Na <span class="sc">*</span> N_ref</span>
-<span id="cb201-5"><a href="#cb201-5" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div class="exercise">
-<p>Extract posterior summaries from a prediction:</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb202"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb202-1"><a href="#cb202-1" aria-hidden="true" tabindex="-1"></a>extract_regabcrf_posterior <span class="ot">=</span> <span class="cf">function</span>(prediction, parameter_name) {</span>
-<span id="cb202-2"><a href="#cb202-2" aria-hidden="true" tabindex="-1"></a>  quantiles <span class="ot">=</span> <span class="fu">as.matrix</span>(prediction<span class="sc">$</span>quantiles)</span>
-<span id="cb202-3"><a href="#cb202-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(</span>
-<span id="cb202-4"><a href="#cb202-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">parameter =</span> parameter_name,</span>
-<span id="cb202-5"><a href="#cb202-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="fu">as.numeric</span>(prediction<span class="sc">$</span>expectation),</span>
-<span id="cb202-6"><a href="#cb202-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="fu">as.numeric</span>(prediction<span class="sc">$</span>med),</span>
-<span id="cb202-7"><a href="#cb202-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantile_2.5 =</span> <span class="fu">as.numeric</span>(quantiles[, <span class="dv">1</span>]),</span>
-<span id="cb202-8"><a href="#cb202-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantile_97.5 =</span> <span class="fu">as.numeric</span>(quantiles[, <span class="dv">2</span>])</span>
-<span id="cb202-9"><a href="#cb202-9" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb202-10"><a href="#cb202-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div class="exercise">
-<p>Estimate one parameter with a regression forest:</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb203"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb203-1"><a href="#cb203-1" aria-hidden="true" tabindex="-1"></a>estimate_one_parameter <span class="ot">=</span> <span class="cf">function</span>(response_name, training_table) {</span>
-<span id="cb203-2"><a href="#cb203-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">identical</span>(<span class="fu">names</span>(training_table), <span class="fu">c</span>(response_name, retained_ss)))</span>
-<span id="cb203-3"><a href="#cb203-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">identical</span>(<span class="fu">names</span>(observed_N1), retained_ss))</span>
-<span id="cb203-4"><a href="#cb203-4" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">=</span> training_table[[response_name]]</span>
-<span id="cb203-5"><a href="#cb203-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">is.numeric</span>(y), <span class="fu">all</span>(<span class="fu">is.finite</span>(y)))</span>
-<span id="cb203-6"><a href="#cb203-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(<span class="fu">unique</span>(y)) <span class="sc">&lt;=</span> <span class="dv">1</span>) {</span>
-<span id="cb203-7"><a href="#cb203-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(</span>
-<span id="cb203-8"><a href="#cb203-8" aria-hidden="true" tabindex="-1"></a>      response_name,</span>
-<span id="cb203-9"><a href="#cb203-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot; is constant among simulations of the selected model.&quot;</span>,</span>
-<span id="cb203-10"><a href="#cb203-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">call. =</span> <span class="cn">FALSE</span></span>
-<span id="cb203-11"><a href="#cb203-11" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb203-12"><a href="#cb203-12" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb203-13"><a href="#cb203-13" aria-hidden="true" tabindex="-1"></a>  other_parameters <span class="ot">=</span> <span class="fu">setdiff</span>(</span>
-<span id="cb203-14"><a href="#cb203-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(defined_parameters, <span class="st">&quot;founder_size_1&quot;</span>, <span class="st">&quot;founder_size_2&quot;</span>, <span class="st">&quot;simulation_id&quot;</span>),</span>
-<span id="cb203-15"><a href="#cb203-15" aria-hidden="true" tabindex="-1"></a>    response_name</span>
-<span id="cb203-16"><a href="#cb203-16" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb203-17"><a href="#cb203-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">length</span>(<span class="fu">intersect</span>(<span class="fu">names</span>(training_table), other_parameters)) <span class="sc">==</span> <span class="dv">0</span>)</span>
-<span id="cb203-18"><a href="#cb203-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb203-19"><a href="#cb203-19" aria-hidden="true" tabindex="-1"></a>  cache_file <span class="ot">=</span> <span class="fu">file.path</span>(</span>
-<span id="cb203-20"><a href="#cb203-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;results/parameter_estimation&quot;</span>,</span>
-<span id="cb203-21"><a href="#cb203-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(response_name, <span class="st">&quot;_prediction.rds&quot;</span>)</span>
-<span id="cb203-22"><a href="#cb203-22" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb203-23"><a href="#cb203-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">file.exists</span>(cache_file)) {</span>
-<span id="cb203-24"><a href="#cb203-24" aria-hidden="true" tabindex="-1"></a>    cached <span class="ot">=</span> <span class="fu">readRDS</span>(cache_file)</span>
-<span id="cb203-25"><a href="#cb203-25" aria-hidden="true" tabindex="-1"></a>    cache_matches <span class="ot">=</span> <span class="fu">identical</span>(cached<span class="sc">$</span>selected_complete_model, selected_complete_model) <span class="sc">&amp;&amp;</span></span>
-<span id="cb203-26"><a href="#cb203-26" aria-hidden="true" tabindex="-1"></a>      <span class="fu">identical</span>(cached<span class="sc">$</span>retained_ss, retained_ss) <span class="sc">&amp;&amp;</span></span>
-<span id="cb203-27"><a href="#cb203-27" aria-hidden="true" tabindex="-1"></a>      <span class="fu">identical</span>(cached<span class="sc">$</span>response_name, response_name)</span>
-<span id="cb203-28"><a href="#cb203-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">isTRUE</span>(cache_matches)) {</span>
-<span id="cb203-29"><a href="#cb203-29" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(cached<span class="sc">$</span>prediction)</span>
-<span id="cb203-30"><a href="#cb203-30" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb203-31"><a href="#cb203-31" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb203-32"><a href="#cb203-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb203-33"><a href="#cb203-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">20260915</span>)</span>
-<span id="cb203-34"><a href="#cb203-34" aria-hidden="true" tabindex="-1"></a>  model_i <span class="ot">=</span> <span class="fu">regAbcrf</span>(</span>
-<span id="cb203-35"><a href="#cb203-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.formula</span>(<span class="fu">paste</span>(response_name, <span class="st">&quot;~ .&quot;</span>)),</span>
-<span id="cb203-36"><a href="#cb203-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> <span class="fu">as.data.frame</span>(training_table),</span>
-<span id="cb203-37"><a href="#cb203-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">ntree =</span> <span class="dv">500</span>,</span>
-<span id="cb203-38"><a href="#cb203-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">paral =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb203-39"><a href="#cb203-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncores =</span> <span class="dv">1</span></span>
-<span id="cb203-40"><a href="#cb203-40" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb203-41"><a href="#cb203-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">20260915</span>)</span>
-<span id="cb203-42"><a href="#cb203-42" aria-hidden="true" tabindex="-1"></a>  prediction_i <span class="ot">=</span> <span class="fu">predict</span>(</span>
-<span id="cb203-43"><a href="#cb203-43" aria-hidden="true" tabindex="-1"></a>    model_i,</span>
-<span id="cb203-44"><a href="#cb203-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">obs =</span> <span class="fu">as.data.frame</span>(observed_N1),</span>
-<span id="cb203-45"><a href="#cb203-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">training =</span> <span class="fu">as.data.frame</span>(training_table),</span>
-<span id="cb203-46"><a href="#cb203-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantiles =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>),</span>
-<span id="cb203-47"><a href="#cb203-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">paral =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb203-48"><a href="#cb203-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncores =</span> <span class="dv">1</span></span>
-<span id="cb203-49"><a href="#cb203-49" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb203-50"><a href="#cb203-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(</span>
-<span id="cb203-51"><a href="#cb203-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(</span>
-<span id="cb203-52"><a href="#cb203-52" aria-hidden="true" tabindex="-1"></a>      <span class="at">selected_complete_model =</span> selected_complete_model,</span>
-<span id="cb203-53"><a href="#cb203-53" aria-hidden="true" tabindex="-1"></a>      <span class="at">retained_ss =</span> retained_ss,</span>
-<span id="cb203-54"><a href="#cb203-54" aria-hidden="true" tabindex="-1"></a>      <span class="at">response_name =</span> response_name,</span>
-<span id="cb203-55"><a href="#cb203-55" aria-hidden="true" tabindex="-1"></a>      <span class="at">prediction =</span> prediction_i</span>
-<span id="cb203-56"><a href="#cb203-56" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb203-57"><a href="#cb203-57" aria-hidden="true" tabindex="-1"></a>    cache_file</span>
-<span id="cb203-58"><a href="#cb203-58" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb203-59"><a href="#cb203-59" aria-hidden="true" tabindex="-1"></a>  prediction_i</span>
-<span id="cb203-60"><a href="#cb203-60" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div class="exercise">
-<p>Estimate every defined parameter, reusing the N1 forest:</p>
-<div class="cell" data-layout-align="center" data-cache.extra="[&quot;SC_2M_2N&quot;,[&quot;N1&quot;,&quot;N2&quot;,&quot;Na&quot;,&quot;founders1&quot;,&quot;founders2&quot;,&quot;Tdem1&quot;,&quot;Tdem2&quot;,&quot;shape_N_a&quot;,&quot;shape_N_b&quot;,&quot;Tsplit&quot;,&quot;Tsc&quot;,&quot;M12&quot;,&quot;nBarriersM12&quot;,&quot;M21&quot;,&quot;nBarriersM21&quot;],[&quot;bialsites_avg&quot;,&quot;bialsites_std&quot;,&quot;sf_avg&quot;,&quot;sf_std&quot;,&quot;sxA_avg&quot;,&quot;sxA_std&quot;,&quot;sxB_avg&quot;,&quot;sxB_std&quot;,&quot;ss_avg&quot;,&quot;ss_std&quot;,&quot;piA_avg&quot;,&quot;piA_std&quot;,&quot;piB_avg&quot;,&quot;piB_std&quot;,&quot;pearson_r_pi&quot;,&quot;thetaA_avg&quot;,&quot;thetaA_std&quot;,&quot;thetaB_avg&quot;,&quot;thetaB_std&quot;,&quot;pearson_r_theta&quot;,&quot;DtajA_avg&quot;,&quot;DtajA_std&quot;,&quot;DtajB_avg&quot;,&quot;DtajB_std&quot;,&quot;divAB_avg&quot;,&quot;divAB_std&quot;,&quot;netdivAB_avg&quot;,&quot;netdivAB_std&quot;,&quot;FST_avg&quot;,&quot;FST_std&quot;,&quot;fA0_fB1&quot;,&quot;fA0_fB2&quot;,&quot;fA0_fB3&quot;,&quot;fA0_fB4&quot;,&quot;fA0_fB5&quot;,&quot;fA0_fB6&quot;,&quot;fA1_fB0&quot;,&quot;fA1_fB1&quot;,&quot;fA1_fB2&quot;,&quot;fA1_fB3&quot;,&quot;fA1_fB4&quot;,&quot;fA1_fB5&quot;,&quot;fA2_fB0&quot;,&quot;fA2_fB1&quot;,&quot;fA2_fB2&quot;,&quot;fA2_fB3&quot;,&quot;fA2_fB4&quot;,&quot;fA3_fB0&quot;,&quot;fA3_fB1&quot;,&quot;fA3_fB2&quot;,&quot;fA3_fB3&quot;,&quot;fA4_fB0&quot;,&quot;fA4_fB1&quot;,&quot;fA4_fB2&quot;,&quot;fA5_fB0&quot;,&quot;fA5_fB1&quot;,&quot;fA6_fB0&quot;],1.2975,&quot;2026-09-10 10:10:23&quot;,&quot;2026-09-10 10:10:23&quot;,&quot;2026-09-10 10:10:23&quot;]">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb204"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb204-1"><a href="#cb204-1" aria-hidden="true" tabindex="-1"></a>parameter_posterior_native <span class="ot">=</span> <span class="fu">list</span>()</span>
-<span id="cb204-2"><a href="#cb204-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (parameter_name <span class="cf">in</span> defined_parameters) {</span>
-<span id="cb204-3"><a href="#cb204-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">identical</span>(parameter_name, <span class="st">&quot;N1&quot;</span>)) {</span>
-<span id="cb204-4"><a href="#cb204-4" aria-hidden="true" tabindex="-1"></a>    prediction_i <span class="ot">=</span> estimate_N1</span>
-<span id="cb204-5"><a href="#cb204-5" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb204-6"><a href="#cb204-6" aria-hidden="true" tabindex="-1"></a>    training_i <span class="ot">=</span> best_model_all <span class="sc">%&gt;%</span></span>
-<span id="cb204-7"><a href="#cb204-7" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(parameter_name), dplyr<span class="sc">::</span><span class="fu">all_of</span>(retained_ss))</span>
-<span id="cb204-8"><a href="#cb204-8" aria-hidden="true" tabindex="-1"></a>    prediction_i <span class="ot">=</span> <span class="fu">estimate_one_parameter</span>(parameter_name, training_i)</span>
-<span id="cb204-9"><a href="#cb204-9" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb204-10"><a href="#cb204-10" aria-hidden="true" tabindex="-1"></a>  parameter_posterior_native[[parameter_name]] <span class="ot">=</span> <span class="fu">extract_regabcrf_posterior</span>(</span>
-<span id="cb204-11"><a href="#cb204-11" aria-hidden="true" tabindex="-1"></a>    prediction_i,</span>
-<span id="cb204-12"><a href="#cb204-12" aria-hidden="true" tabindex="-1"></a>    parameter_name</span>
-<span id="cb204-13"><a href="#cb204-13" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb204-14"><a href="#cb204-14" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb204-15"><a href="#cb204-15" aria-hidden="true" tabindex="-1"></a>parameter_posterior_native <span class="ot">=</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(parameter_posterior_native)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div class="exercise">
-<p>Estimate the two founder population sizes:</p>
-<div class="cell" data-layout-align="center" data-cache.extra="[&quot;SC_2M_2N&quot;,[&quot;bialsites_avg&quot;,&quot;bialsites_std&quot;,&quot;sf_avg&quot;,&quot;sf_std&quot;,&quot;sxA_avg&quot;,&quot;sxA_std&quot;,&quot;sxB_avg&quot;,&quot;sxB_std&quot;,&quot;ss_avg&quot;,&quot;ss_std&quot;,&quot;piA_avg&quot;,&quot;piA_std&quot;,&quot;piB_avg&quot;,&quot;piB_std&quot;,&quot;pearson_r_pi&quot;,&quot;thetaA_avg&quot;,&quot;thetaA_std&quot;,&quot;thetaB_avg&quot;,&quot;thetaB_std&quot;,&quot;pearson_r_theta&quot;,&quot;DtajA_avg&quot;,&quot;DtajA_std&quot;,&quot;DtajB_avg&quot;,&quot;DtajB_std&quot;,&quot;divAB_avg&quot;,&quot;divAB_std&quot;,&quot;netdivAB_avg&quot;,&quot;netdivAB_std&quot;,&quot;FST_avg&quot;,&quot;FST_std&quot;,&quot;fA0_fB1&quot;,&quot;fA0_fB2&quot;,&quot;fA0_fB3&quot;,&quot;fA0_fB4&quot;,&quot;fA0_fB5&quot;,&quot;fA0_fB6&quot;,&quot;fA1_fB0&quot;,&quot;fA1_fB1&quot;,&quot;fA1_fB2&quot;,&quot;fA1_fB3&quot;,&quot;fA1_fB4&quot;,&quot;fA1_fB5&quot;,&quot;fA2_fB0&quot;,&quot;fA2_fB1&quot;,&quot;fA2_fB2&quot;,&quot;fA2_fB3&quot;,&quot;fA2_fB4&quot;,&quot;fA3_fB0&quot;,&quot;fA3_fB1&quot;,&quot;fA3_fB2&quot;,&quot;fA3_fB3&quot;,&quot;fA4_fB0&quot;,&quot;fA4_fB1&quot;,&quot;fA4_fB2&quot;,&quot;fA5_fB0&quot;,&quot;fA5_fB1&quot;,&quot;fA6_fB0&quot;],&quot;2026-09-10 10:10:23&quot;,&quot;2026-09-10 10:10:23&quot;,&quot;2026-09-10 10:10:23&quot;]">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb205"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb205-1"><a href="#cb205-1" aria-hidden="true" tabindex="-1"></a>training_founder_1 <span class="ot">=</span> best_model_founder <span class="sc">%&gt;%</span></span>
-<span id="cb205-2"><a href="#cb205-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(founder_size_1, dplyr<span class="sc">::</span><span class="fu">all_of</span>(retained_ss))</span>
-<span id="cb205-3"><a href="#cb205-3" aria-hidden="true" tabindex="-1"></a>training_founder_2 <span class="ot">=</span> best_model_founder <span class="sc">%&gt;%</span></span>
-<span id="cb205-4"><a href="#cb205-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(founder_size_2, dplyr<span class="sc">::</span><span class="fu">all_of</span>(retained_ss))</span>
-<span id="cb205-5"><a href="#cb205-5" aria-hidden="true" tabindex="-1"></a>prediction_founder_1 <span class="ot">=</span> <span class="fu">estimate_one_parameter</span>(<span class="st">&quot;founder_size_1&quot;</span>, training_founder_1)</span>
-<span id="cb205-6"><a href="#cb205-6" aria-hidden="true" tabindex="-1"></a>prediction_founder_2 <span class="ot">=</span> <span class="fu">estimate_one_parameter</span>(<span class="st">&quot;founder_size_2&quot;</span>, training_founder_2)</span>
-<span id="cb205-7"><a href="#cb205-7" aria-hidden="true" tabindex="-1"></a>founder_posterior_native <span class="ot">=</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(</span>
-<span id="cb205-8"><a href="#cb205-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_regabcrf_posterior</span>(prediction_founder_1, <span class="st">&quot;founder_size_1&quot;</span>),</span>
-<span id="cb205-9"><a href="#cb205-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_regabcrf_posterior</span>(prediction_founder_2, <span class="st">&quot;founder_size_2&quot;</span>)</span>
-<span id="cb205-10"><a href="#cb205-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div class="exercise">
-<p>Combine native estimates:</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb206"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb206-1"><a href="#cb206-1" aria-hidden="true" tabindex="-1"></a>parameter_posterior_native <span class="ot">=</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(</span>
-<span id="cb206-2"><a href="#cb206-2" aria-hidden="true" tabindex="-1"></a>  parameter_posterior_native,</span>
-<span id="cb206-3"><a href="#cb206-3" aria-hidden="true" tabindex="-1"></a>  founder_posterior_native</span>
-<span id="cb206-4"><a href="#cb206-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div class="exercise">
-<p>Build converted rows:</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb207"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb207-1"><a href="#cb207-1" aria-hidden="true" tabindex="-1"></a>conversion_plan <span class="ot">=</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
-<span id="cb207-2"><a href="#cb207-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>parameter, <span class="sc">~</span>units, <span class="sc">~</span>scale, <span class="sc">~</span>style,</span>
-<span id="cb207-3"><a href="#cb207-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;N1&quot;</span>, <span class="st">&quot;relative to Nref&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-4"><a href="#cb207-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;N1&quot;</span>, <span class="st">&quot;individuals&quot;</span>, N_ref, <span class="st">&quot;count&quot;</span>,</span>
-<span id="cb207-5"><a href="#cb207-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;N2&quot;</span>, <span class="st">&quot;relative to Nref&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-6"><a href="#cb207-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;N2&quot;</span>, <span class="st">&quot;individuals&quot;</span>, N_ref, <span class="st">&quot;count&quot;</span>,</span>
-<span id="cb207-7"><a href="#cb207-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Na&quot;</span>, <span class="st">&quot;relative to Nref&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-8"><a href="#cb207-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Na&quot;</span>, <span class="st">&quot;individuals&quot;</span>, N_ref, <span class="st">&quot;count&quot;</span>,</span>
-<span id="cb207-9"><a href="#cb207-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;founders1&quot;</span>, <span class="st">&quot;fraction of ancestral size&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-10"><a href="#cb207-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;founder_size_1&quot;</span>, <span class="st">&quot;individuals&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;count&quot;</span>,</span>
-<span id="cb207-11"><a href="#cb207-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;founders2&quot;</span>, <span class="st">&quot;fraction of ancestral size&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-12"><a href="#cb207-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;founder_size_2&quot;</span>, <span class="st">&quot;individuals&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;count&quot;</span>,</span>
-<span id="cb207-13"><a href="#cb207-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Tdem1&quot;</span>, <span class="st">&quot;simulator units&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-14"><a href="#cb207-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Tdem1&quot;</span>, <span class="st">&quot;generations&quot;</span>, <span class="dv">4</span> <span class="sc">*</span> N_ref, <span class="st">&quot;count&quot;</span>,</span>
-<span id="cb207-15"><a href="#cb207-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Tdem2&quot;</span>, <span class="st">&quot;simulator units&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-16"><a href="#cb207-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Tdem2&quot;</span>, <span class="st">&quot;generations&quot;</span>, <span class="dv">4</span> <span class="sc">*</span> N_ref, <span class="st">&quot;count&quot;</span>,</span>
-<span id="cb207-17"><a href="#cb207-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Tsplit&quot;</span>, <span class="st">&quot;simulator units&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-18"><a href="#cb207-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Tsplit&quot;</span>, <span class="st">&quot;generations&quot;</span>, <span class="dv">4</span> <span class="sc">*</span> N_ref, <span class="st">&quot;count&quot;</span>,</span>
-<span id="cb207-19"><a href="#cb207-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Tsc&quot;</span>, <span class="st">&quot;simulator units&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-20"><a href="#cb207-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Tsc&quot;</span>, <span class="st">&quot;generations&quot;</span>, <span class="dv">4</span> <span class="sc">*</span> N_ref, <span class="st">&quot;count&quot;</span>,</span>
-<span id="cb207-21"><a href="#cb207-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;M12&quot;</span>, <span class="st">&quot;4Nm&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-22"><a href="#cb207-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;M21&quot;</span>, <span class="st">&quot;4Nm&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-23"><a href="#cb207-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;shape_N_a&quot;</span>, <span class="st">&quot;dimensionless&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-24"><a href="#cb207-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;shape_N_b&quot;</span>, <span class="st">&quot;dimensionless&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;small&quot;</span>,</span>
-<span id="cb207-25"><a href="#cb207-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;nBarriersM12&quot;</span>, <span class="st">&quot;loci&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;loci&quot;</span>,</span>
-<span id="cb207-26"><a href="#cb207-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;nBarriersM21&quot;</span>, <span class="st">&quot;loci&quot;</span>, <span class="dv">1</span>, <span class="st">&quot;loci&quot;</span></span>
-<span id="cb207-27"><a href="#cb207-27" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb207-28"><a href="#cb207-28" aria-hidden="true" tabindex="-1"></a>parameter_posterior <span class="ot">=</span> conversion_plan <span class="sc">%&gt;%</span></span>
-<span id="cb207-29"><a href="#cb207-29" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(parameter_posterior_native, <span class="at">by =</span> <span class="st">&quot;parameter&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb207-30"><a href="#cb207-30" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb207-31"><a href="#cb207-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> mean <span class="sc">*</span> scale,</span>
-<span id="cb207-32"><a href="#cb207-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> median <span class="sc">*</span> scale,</span>
-<span id="cb207-33"><a href="#cb207-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantile_2.5 =</span> quantile_2<span class="fl">.5</span> <span class="sc">*</span> scale,</span>
-<span id="cb207-34"><a href="#cb207-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantile_97.5 =</span> quantile_97<span class="fl">.5</span> <span class="sc">*</span> scale</span>
-<span id="cb207-35"><a href="#cb207-35" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div class="exercise">
-<p>Export the unrounded table:</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb208"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb208-1"><a href="#cb208-1" aria-hidden="true" tabindex="-1"></a>readr<span class="sc">::</span><span class="fu">write_tsv</span>(</span>
-<span id="cb208-2"><a href="#cb208-2" aria-hidden="true" tabindex="-1"></a>  parameter_posterior <span class="sc">%&gt;%</span></span>
-<span id="cb208-3"><a href="#cb208-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(parameter, units, mean, median, quantile_2<span class="fl">.5</span>, quantile_97<span class="fl">.5</span>),</span>
-<span id="cb208-4"><a href="#cb208-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;results/parameter_estimation/all_parameters_posterior.tsv&quot;</span></span>
-<span id="cb208-5"><a href="#cb208-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div class="exercise">
-<p>Format values for display:</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb209"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb209-1"><a href="#cb209-1" aria-hidden="true" tabindex="-1"></a>format_posterior_value <span class="ot">=</span> <span class="cf">function</span>(x, style) {</span>
-<span id="cb209-2"><a href="#cb209-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">identical</span>(style, <span class="st">&quot;count&quot;</span>)) {</span>
-<span id="cb209-3"><a href="#cb209-3" aria-hidden="true" tabindex="-1"></a>    rounded <span class="ot">=</span> <span class="fu">round</span>(x)</span>
-<span id="cb209-4"><a href="#cb209-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (rounded <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> x <span class="sc">!=</span> <span class="dv">0</span>) {</span>
-<span id="cb209-5"><a href="#cb209-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">format</span>(<span class="fu">signif</span>(x, <span class="dv">3</span>), <span class="at">scientific =</span> <span class="cn">FALSE</span>, <span class="at">trim =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb209-6"><a href="#cb209-6" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb209-7"><a href="#cb209-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">format</span>(rounded, <span class="at">scientific =</span> <span class="cn">FALSE</span>, <span class="at">trim =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb209-8"><a href="#cb209-8" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb209-9"><a href="#cb209-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">identical</span>(style, <span class="st">&quot;loci&quot;</span>)) {</span>
-<span id="cb209-10"><a href="#cb209-10" aria-hidden="true" tabindex="-1"></a>    rounded <span class="ot">=</span> <span class="fu">round</span>(x, <span class="dv">1</span>)</span>
-<span id="cb209-11"><a href="#cb209-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (rounded <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> x <span class="sc">!=</span> <span class="dv">0</span>) {</span>
-<span id="cb209-12"><a href="#cb209-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">format</span>(<span class="fu">signif</span>(x, <span class="dv">3</span>), <span class="at">scientific =</span> <span class="cn">FALSE</span>, <span class="at">trim =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb209-13"><a href="#cb209-13" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb209-14"><a href="#cb209-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">format</span>(rounded, <span class="at">nsmall =</span> <span class="dv">1</span>, <span class="at">scientific =</span> <span class="cn">FALSE</span>, <span class="at">trim =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb209-15"><a href="#cb209-15" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb209-16"><a href="#cb209-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format</span>(<span class="fu">signif</span>(x, <span class="dv">3</span>), <span class="at">scientific =</span> <span class="cn">FALSE</span>, <span class="at">trim =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb209-17"><a href="#cb209-17" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb209-18"><a href="#cb209-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb209-19"><a href="#cb209-19" aria-hidden="true" tabindex="-1"></a>parameter_posterior_display <span class="ot">=</span> parameter_posterior <span class="sc">%&gt;%</span></span>
-<span id="cb209-20"><a href="#cb209-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb209-21"><a href="#cb209-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="fu">mapply</span>(format_posterior_value, mean, style),</span>
-<span id="cb209-22"><a href="#cb209-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="fu">mapply</span>(format_posterior_value, median, style),</span>
-<span id="cb209-23"><a href="#cb209-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantile_2.5 =</span> <span class="fu">mapply</span>(format_posterior_value, quantile_2<span class="fl">.5</span>, style),</span>
-<span id="cb209-24"><a href="#cb209-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantile_97.5 =</span> <span class="fu">mapply</span>(format_posterior_value, quantile_97<span class="fl">.5</span>, style)</span>
-<span id="cb209-25"><a href="#cb209-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb209-26"><a href="#cb209-26" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(parameter, units, mean, median, quantile_2<span class="fl">.5</span>, quantile_97<span class="fl">.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</details>
-<p>Compare the estimates, keeping their uncertainty in view:</p>
-<p><code>kable()</code> formats the results as a readable table in this document. <code>col.names</code> sets the column headings and <code>align</code> controls their alignment; neither changes the estimates.</p>
-<div class="exercise">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb210"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb210-1"><a href="#cb210-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb210-2"><a href="#cb210-2" aria-hidden="true" tabindex="-1"></a>  parameter_posterior_display,</span>
-<span id="cb210-3"><a href="#cb210-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="fu">c</span>(</span>
-<span id="cb210-4"><a href="#cb210-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Parameter&quot;</span>,</span>
-<span id="cb210-5"><a href="#cb210-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Units&quot;</span>,</span>
-<span id="cb210-6"><a href="#cb210-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Mean (expectation)&quot;</span>,</span>
-<span id="cb210-7"><a href="#cb210-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Median&quot;</span>,</span>
-<span id="cb210-8"><a href="#cb210-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;2.5%&quot;</span>,</span>
-<span id="cb210-9"><a href="#cb210-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;97.5%&quot;</span></span>
-<span id="cb210-10"><a href="#cb210-10" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb210-11"><a href="#cb210-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">align =</span> <span class="fu">c</span>(<span class="st">&quot;l&quot;</span>, <span class="st">&quot;l&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;r&quot;</span>)</span>
-<span id="cb210-12"><a href="#cb210-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -5352,7 +5098,7 @@ Show the code used to build this table
 </table>
 </div>
 </div>
-</div>
+<p>Start by looking at the units and the widths of the intervals. Which parts of the history appear well constrained, and which remain uncertain?</p>
 <p>Each row summarises one parameter. Combining every posterior mean into a single history does not necessarily give a combination that is jointly well supported.</p>
 <p>Sizes are expressed in individuals and times in generations. Migration is reported as 4Nm; dividing by four gives Nm, the effective number of migrants per generation. Under 2M, this rate describes the loci that allow migration, while barrier loci have a rate of zero.</p>
 <p>M12 describes migration from population B to A, and M21 from A to B.</p>
@@ -5368,18 +5114,18 @@ Show the code used to build this table
 <p>I have already prepared simulations for this check. Read the table:</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb211"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb211-1"><a href="#cb211-1" aria-hidden="true" tabindex="-1"></a>gof <span class="ot">=</span> <span class="fu">read.table</span>(</span>
-<span id="cb211-2"><a href="#cb211-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;data/goodness_of_fit_data.tsv&quot;</span>,</span>
-<span id="cb211-3"><a href="#cb211-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">header =</span> <span class="cn">TRUE</span></span>
-<span id="cb211-4"><a href="#cb211-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
-<span id="cb211-5"><a href="#cb211-5" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb198"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb198-1"><a href="#cb198-1" aria-hidden="true" tabindex="-1"></a>gof <span class="ot">=</span> <span class="fu">read.table</span>(</span>
+<span id="cb198-2"><a href="#cb198-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;data/goodness_of_fit_data.tsv&quot;</span>,</span>
+<span id="cb198-3"><a href="#cb198-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">header =</span> <span class="cn">TRUE</span></span>
+<span id="cb198-4"><a href="#cb198-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb198-5"><a href="#cb198-5" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>The <code>origin</code> column distinguishes simulations before parameter fitting, simulations after fitting, and the observation. How many rows belong to each?</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb212"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb212-1"><a href="#cb212-1" aria-hidden="true" tabindex="-1"></a>gof <span class="sc">%&gt;%</span></span>
-<span id="cb212-2"><a href="#cb212-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>(origin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb199"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb199-1"><a href="#cb199-1" aria-hidden="true" tabindex="-1"></a>gof <span class="sc">%&gt;%</span></span>
+<span id="cb199-2"><a href="#cb199-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>(origin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 2
   origin                   n
@@ -5420,7 +5166,7 @@ Show the code used to build this table
 <p>Check that these simulations were generated under the same model we selected:</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb214"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb214-1"><a href="#cb214-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(gof<span class="sc">$</span>fitted_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb201"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb201-1"><a href="#cb201-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(gof<span class="sc">$</span>fitted_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] &quot;SC_2M_2N&quot;</code></pre>
 </div>
@@ -5428,10 +5174,10 @@ Show the code used to build this table
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb216"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb216-1"><a href="#cb216-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(</span>
-<span id="cb216-2"><a href="#cb216-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>(<span class="fu">as.character</span>(gof<span class="sc">$</span>fitted_model)),</span>
-<span id="cb216-3"><a href="#cb216-3" aria-hidden="true" tabindex="-1"></a>  selected_complete_model</span>
-<span id="cb216-4"><a href="#cb216-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb203"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb203-1"><a href="#cb203-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(</span>
+<span id="cb203-2"><a href="#cb203-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>(<span class="fu">as.character</span>(gof<span class="sc">$</span>fitted_model)),</span>
+<span id="cb203-3"><a href="#cb203-3" aria-hidden="true" tabindex="-1"></a>  selected_complete_model</span>
+<span id="cb203-4"><a href="#cb203-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] TRUE</code></pre>
 </div>
@@ -5446,42 +5192,42 @@ Show the code used to build this table
 <p>Keep simulations and observation in separate objects: the simulations define distributions, while the observation will be drawn as a line.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb218"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb218-1"><a href="#cb218-1" aria-hidden="true" tabindex="-1"></a>gof_simulations <span class="ot">=</span> gof <span class="sc">%&gt;%</span></span>
-<span id="cb218-2"><a href="#cb218-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(origin <span class="sc">!=</span> <span class="st">&quot;observed&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb218-3"><a href="#cb218-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb218-4"><a href="#cb218-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">origin =</span> <span class="fu">factor</span>(</span>
-<span id="cb218-5"><a href="#cb218-5" aria-hidden="true" tabindex="-1"></a>      origin,</span>
-<span id="cb218-6"><a href="#cb218-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;prior_predictive&quot;</span>, <span class="st">&quot;posterior_predictive&quot;</span>)</span>
-<span id="cb218-7"><a href="#cb218-7" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb218-8"><a href="#cb218-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb205"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb205-1"><a href="#cb205-1" aria-hidden="true" tabindex="-1"></a>gof_simulations <span class="ot">=</span> gof <span class="sc">%&gt;%</span></span>
+<span id="cb205-2"><a href="#cb205-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(origin <span class="sc">!=</span> <span class="st">&quot;observed&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb205-3"><a href="#cb205-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb205-4"><a href="#cb205-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">origin =</span> <span class="fu">factor</span>(</span>
+<span id="cb205-5"><a href="#cb205-5" aria-hidden="true" tabindex="-1"></a>      origin,</span>
+<span id="cb205-6"><a href="#cb205-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;prior_predictive&quot;</span>, <span class="st">&quot;posterior_predictive&quot;</span>)</span>
+<span id="cb205-7"><a href="#cb205-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb205-8"><a href="#cb205-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb219"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb219-1"><a href="#cb219-1" aria-hidden="true" tabindex="-1"></a>gof_observed <span class="ot">=</span> gof <span class="sc">%&gt;%</span></span>
-<span id="cb219-2"><a href="#cb219-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(origin <span class="sc">==</span> <span class="st">&quot;observed&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb206"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb206-1"><a href="#cb206-1" aria-hidden="true" tabindex="-1"></a>gof_observed <span class="ot">=</span> gof <span class="sc">%&gt;%</span></span>
+<span id="cb206-2"><a href="#cb206-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(origin <span class="sc">==</span> <span class="st">&quot;observed&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Let us compare the simulated distributions of the mean number of SNPs per locus. The grey distribution represents the prior, the turquoise distribution the fitted model, and the black line the observation.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb220"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb220-1"><a href="#cb220-1" aria-hidden="true" tabindex="-1"></a>plot_gof_univariate <span class="ot">=</span> <span class="fu">ggplot</span>(</span>
-<span id="cb220-2"><a href="#cb220-2" aria-hidden="true" tabindex="-1"></a>  gof_simulations, <span class="fu">aes</span>(<span class="at">x =</span> bialsites_avg, <span class="at">fill =</span> origin)</span>
-<span id="cb220-3"><a href="#cb220-3" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
-<span id="cb220-4"><a href="#cb220-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb220-5"><a href="#cb220-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> gof_observed<span class="sc">$</span>bialsites_avg, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb220-6"><a href="#cb220-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(</span>
-<span id="cb220-7"><a href="#cb220-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="at">prior_predictive =</span> <span class="st">&quot;grey70&quot;</span>, <span class="at">posterior_predictive =</span> <span class="st">&quot;#40E0D0&quot;</span>),</span>
-<span id="cb220-8"><a href="#cb220-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="at">prior_predictive =</span> <span class="st">&quot;Prior predictive&quot;</span>,</span>
-<span id="cb220-9"><a href="#cb220-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">posterior_predictive =</span> <span class="st">&quot;Posterior predictive&quot;</span>)</span>
-<span id="cb220-10"><a href="#cb220-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb220-11"><a href="#cb220-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Mean number of SNPs per locus&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
-<span id="cb220-12"><a href="#cb220-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb207"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb207-1"><a href="#cb207-1" aria-hidden="true" tabindex="-1"></a>plot_gof_univariate <span class="ot">=</span> <span class="fu">ggplot</span>(</span>
+<span id="cb207-2"><a href="#cb207-2" aria-hidden="true" tabindex="-1"></a>  gof_simulations, <span class="fu">aes</span>(<span class="at">x =</span> bialsites_avg, <span class="at">fill =</span> origin)</span>
+<span id="cb207-3"><a href="#cb207-3" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb207-4"><a href="#cb207-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb207-5"><a href="#cb207-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> gof_observed<span class="sc">$</span>bialsites_avg, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb207-6"><a href="#cb207-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb207-7"><a href="#cb207-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="at">prior_predictive =</span> <span class="st">&quot;grey70&quot;</span>, <span class="at">posterior_predictive =</span> <span class="st">&quot;#40E0D0&quot;</span>),</span>
+<span id="cb207-8"><a href="#cb207-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="at">prior_predictive =</span> <span class="st">&quot;Prior predictive&quot;</span>,</span>
+<span id="cb207-9"><a href="#cb207-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">posterior_predictive =</span> <span class="st">&quot;Posterior predictive&quot;</span>)</span>
+<span id="cb207-10"><a href="#cb207-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb207-11"><a href="#cb207-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Mean number of SNPs per locus&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb207-12"><a href="#cb207-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb221"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb221-1"><a href="#cb221-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(plot_gof_univariate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb208"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb208-1"><a href="#cb208-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(plot_gof_univariate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -5524,29 +5270,29 @@ Check your answer
 <p>First, select the simulated statistics and check which ones are constant.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb222"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb222-1"><a href="#cb222-1" aria-hidden="true" tabindex="-1"></a>gof_simulation_statistics <span class="ot">=</span> gof_simulations <span class="sc">%&gt;%</span></span>
-<span id="cb222-2"><a href="#cb222-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(summary_statistics))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb209"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb209-1"><a href="#cb209-1" aria-hidden="true" tabindex="-1"></a>gof_simulation_statistics <span class="ot">=</span> gof_simulations <span class="sc">%&gt;%</span></span>
+<span id="cb209-2"><a href="#cb209-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(summary_statistics))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb223"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb223-1"><a href="#cb223-1" aria-hidden="true" tabindex="-1"></a>gof_simulation_sds <span class="ot">=</span> <span class="fu">vapply</span>(</span>
-<span id="cb223-2"><a href="#cb223-2" aria-hidden="true" tabindex="-1"></a>  gof_simulation_statistics,</span>
-<span id="cb223-3"><a href="#cb223-3" aria-hidden="true" tabindex="-1"></a>  sd,</span>
-<span id="cb223-4"><a href="#cb223-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">numeric</span>(<span class="dv">1</span>)</span>
-<span id="cb223-5"><a href="#cb223-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb210"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb210-1"><a href="#cb210-1" aria-hidden="true" tabindex="-1"></a>gof_simulation_sds <span class="ot">=</span> <span class="fu">vapply</span>(</span>
+<span id="cb210-2"><a href="#cb210-2" aria-hidden="true" tabindex="-1"></a>  gof_simulation_statistics,</span>
+<span id="cb210-3"><a href="#cb210-3" aria-hidden="true" tabindex="-1"></a>  sd,</span>
+<span id="cb210-4"><a href="#cb210-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">numeric</span>(<span class="dv">1</span>)</span>
+<span id="cb210-5"><a href="#cb210-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb224"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb224-1"><a href="#cb224-1" aria-hidden="true" tabindex="-1"></a>gof_constant_statistics <span class="ot">=</span> <span class="fu">names</span>(gof_simulation_sds)[</span>
-<span id="cb224-2"><a href="#cb224-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">!</span><span class="fu">is.finite</span>(gof_simulation_sds) <span class="sc">|</span> gof_simulation_sds <span class="sc">==</span> <span class="dv">0</span></span>
-<span id="cb224-3"><a href="#cb224-3" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb211"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb211-1"><a href="#cb211-1" aria-hidden="true" tabindex="-1"></a>gof_constant_statistics <span class="ot">=</span> <span class="fu">names</span>(gof_simulation_sds)[</span>
+<span id="cb211-2"><a href="#cb211-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">!</span><span class="fu">is.finite</span>(gof_simulation_sds) <span class="sc">|</span> gof_simulation_sds <span class="sc">==</span> <span class="dv">0</span></span>
+<span id="cb211-3"><a href="#cb211-3" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb225"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb225-1"><a href="#cb225-1" aria-hidden="true" tabindex="-1"></a>gof_constant_statistics</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb212"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb212-1"><a href="#cb212-1" aria-hidden="true" tabindex="-1"></a>gof_constant_statistics</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] &quot;fA1_fB6&quot; &quot;fA2_fB5&quot; &quot;fA2_fB6&quot; &quot;fA3_fB4&quot; &quot;fA3_fB5&quot; &quot;fA3_fB6&quot; &quot;fA4_fB3&quot; &quot;fA4_fB4&quot; &quot;fA4_fB5&quot; &quot;fA4_fB6&quot; &quot;fA5_fB2&quot; &quot;fA5_fB3&quot; &quot;fA5_fB4&quot; &quot;fA5_fB5&quot;
 [15] &quot;fA5_fB6&quot; &quot;fA6_fB1&quot; &quot;fA6_fB2&quot; &quot;fA6_fB3&quot; &quot;fA6_fB4&quot; &quot;fA6_fB5&quot;</code></pre>
@@ -5558,20 +5304,20 @@ Check your answer
 <p>Compare the observation with the constant simulated values:</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb227"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb227-1"><a href="#cb227-1" aria-hidden="true" tabindex="-1"></a>gof_machine_tolerance <span class="ot">=</span> <span class="fu">sqrt</span>(.Machine<span class="sc">$</span>double.eps)</span>
-<span id="cb227-2"><a href="#cb227-2" aria-hidden="true" tabindex="-1"></a>gof_constant_mismatch <span class="ot">=</span> gof_constant_statistics[</span>
-<span id="cb227-3"><a href="#cb227-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vapply</span>(gof_constant_statistics, <span class="cf">function</span>(nm) {</span>
-<span id="cb227-4"><a href="#cb227-4" aria-hidden="true" tabindex="-1"></a>    simulation_value <span class="ot">=</span> gof_simulation_statistics[[nm]][<span class="dv">1</span>]</span>
-<span id="cb227-5"><a href="#cb227-5" aria-hidden="true" tabindex="-1"></a>    observed_value <span class="ot">=</span> gof_observed[[nm]]</span>
-<span id="cb227-6"><a href="#cb227-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">abs</span>(observed_value <span class="sc">-</span> simulation_value) <span class="sc">&gt;</span> gof_machine_tolerance</span>
-<span id="cb227-7"><a href="#cb227-7" aria-hidden="true" tabindex="-1"></a>  }, <span class="fu">logical</span>(<span class="dv">1</span>))</span>
-<span id="cb227-8"><a href="#cb227-8" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb214"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb214-1"><a href="#cb214-1" aria-hidden="true" tabindex="-1"></a>gof_machine_tolerance <span class="ot">=</span> <span class="fu">sqrt</span>(.Machine<span class="sc">$</span>double.eps)</span>
+<span id="cb214-2"><a href="#cb214-2" aria-hidden="true" tabindex="-1"></a>gof_constant_mismatch <span class="ot">=</span> gof_constant_statistics[</span>
+<span id="cb214-3"><a href="#cb214-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vapply</span>(gof_constant_statistics, <span class="cf">function</span>(nm) {</span>
+<span id="cb214-4"><a href="#cb214-4" aria-hidden="true" tabindex="-1"></a>    simulation_value <span class="ot">=</span> gof_simulation_statistics[[nm]][<span class="dv">1</span>]</span>
+<span id="cb214-5"><a href="#cb214-5" aria-hidden="true" tabindex="-1"></a>    observed_value <span class="ot">=</span> gof_observed[[nm]]</span>
+<span id="cb214-6"><a href="#cb214-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">abs</span>(observed_value <span class="sc">-</span> simulation_value) <span class="sc">&gt;</span> gof_machine_tolerance</span>
+<span id="cb214-7"><a href="#cb214-7" aria-hidden="true" tabindex="-1"></a>  }, <span class="fu">logical</span>(<span class="dv">1</span>))</span>
+<span id="cb214-8"><a href="#cb214-8" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Does any statistic differ?</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb228"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb228-1"><a href="#cb228-1" aria-hidden="true" tabindex="-1"></a>gof_constant_mismatch</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb215"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb215-1"><a href="#cb215-1" aria-hidden="true" tabindex="-1"></a>gof_constant_mismatch</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>character(0)</code></pre>
 </div>
@@ -5580,13 +5326,13 @@ Check your answer
 <p>If a name appears here, the observation differs from every simulation for that statistic. That is already a mismatch worth investigating. We will leave constant statistics out of the PCA because they cannot be standardised, but we must keep this finding in our interpretation.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb230"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb230-1"><a href="#cb230-1" aria-hidden="true" tabindex="-1"></a>gof_pca_statistics <span class="ot">=</span> <span class="fu">setdiff</span>(summary_statistics, gof_constant_statistics)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb217"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb217-1"><a href="#cb217-1" aria-hidden="true" tabindex="-1"></a>gof_pca_statistics <span class="ot">=</span> <span class="fu">setdiff</span>(summary_statistics, gof_constant_statistics)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>How many statistics remain?</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb231"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb231-1"><a href="#cb231-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(gof_pca_statistics)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb218"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb218-1"><a href="#cb218-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(gof_pca_statistics)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 57</code></pre>
 </div>
@@ -5595,15 +5341,15 @@ Check your answer
 <p>Prepare the simulated values for the PCA.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb233"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb233-1"><a href="#cb233-1" aria-hidden="true" tabindex="-1"></a>gof_simulation_predictors <span class="ot">=</span> gof_simulations <span class="sc">%&gt;%</span></span>
-<span id="cb233-2"><a href="#cb233-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(gof_pca_statistics))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb220"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb220-1"><a href="#cb220-1" aria-hidden="true" tabindex="-1"></a>gof_simulation_predictors <span class="ot">=</span> gof_simulations <span class="sc">%&gt;%</span></span>
+<span id="cb220-2"><a href="#cb220-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(gof_pca_statistics))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Select the same columns, in the same order, for the observation.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb234"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb234-1"><a href="#cb234-1" aria-hidden="true" tabindex="-1"></a>gof_observed_predictors <span class="ot">=</span> gof_observed <span class="sc">%&gt;%</span></span>
-<span id="cb234-2"><a href="#cb234-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(gof_pca_statistics))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb221"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb221-1"><a href="#cb221-1" aria-hidden="true" tabindex="-1"></a>gof_observed_predictors <span class="ot">=</span> gof_observed <span class="sc">%&gt;%</span></span>
+<span id="cb221-2"><a href="#cb221-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(gof_pca_statistics))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </section>
@@ -5612,77 +5358,77 @@ Check your answer
 <p>Fit the PCA using simulations only. This defines the centre, scaling and axes from the simulated data.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb235"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb235-1"><a href="#cb235-1" aria-hidden="true" tabindex="-1"></a>gof_pca <span class="ot">=</span> <span class="fu">prcomp</span>(</span>
-<span id="cb235-2"><a href="#cb235-2" aria-hidden="true" tabindex="-1"></a>  gof_simulation_predictors,</span>
-<span id="cb235-3"><a href="#cb235-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">center =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb235-4"><a href="#cb235-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">scale. =</span> <span class="cn">TRUE</span></span>
-<span id="cb235-5"><a href="#cb235-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb222"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb222-1"><a href="#cb222-1" aria-hidden="true" tabindex="-1"></a>gof_pca <span class="ot">=</span> <span class="fu">prcomp</span>(</span>
+<span id="cb222-2"><a href="#cb222-2" aria-hidden="true" tabindex="-1"></a>  gof_simulation_predictors,</span>
+<span id="cb222-3"><a href="#cb222-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">center =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb222-4"><a href="#cb222-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">scale. =</span> <span class="cn">TRUE</span></span>
+<span id="cb222-5"><a href="#cb222-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Now project the observation onto those axes. It does not influence how the axes were constructed.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb236"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb236-1"><a href="#cb236-1" aria-hidden="true" tabindex="-1"></a>gof_observed_coordinates <span class="ot">=</span> <span class="fu">predict</span>(</span>
-<span id="cb236-2"><a href="#cb236-2" aria-hidden="true" tabindex="-1"></a>  gof_pca,</span>
-<span id="cb236-3"><a href="#cb236-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> gof_observed_predictors</span>
-<span id="cb236-4"><a href="#cb236-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb223"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb223-1"><a href="#cb223-1" aria-hidden="true" tabindex="-1"></a>gof_observed_coordinates <span class="ot">=</span> <span class="fu">predict</span>(</span>
+<span id="cb223-2"><a href="#cb223-2" aria-hidden="true" tabindex="-1"></a>  gof_pca,</span>
+<span id="cb223-3"><a href="#cb223-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> gof_observed_predictors</span>
+<span id="cb223-4"><a href="#cb223-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>PC1 captures the largest part of the variation among simulations. PC2 captures the largest remaining part along an axis perpendicular to PC1. The percentages on the axes tell us how much of the total variation this plot displays.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb237"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb237-1"><a href="#cb237-1" aria-hidden="true" tabindex="-1"></a>gof_pca_variance <span class="ot">=</span> gof_pca<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="fu">sum</span>(gof_pca<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb224"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb224-1"><a href="#cb224-1" aria-hidden="true" tabindex="-1"></a>gof_pca_variance <span class="ot">=</span> gof_pca<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="fu">sum</span>(gof_pca<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Collect the coordinates returned for the simulations and the observation.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb238"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb238-1"><a href="#cb238-1" aria-hidden="true" tabindex="-1"></a>gof_pca_simulations <span class="ot">=</span> <span class="fu">tibble</span>(</span>
-<span id="cb238-2"><a href="#cb238-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">origin =</span> gof_simulations<span class="sc">$</span>origin,</span>
-<span id="cb238-3"><a href="#cb238-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC1 =</span> gof_pca<span class="sc">$</span>x[, <span class="dv">1</span>],</span>
-<span id="cb238-4"><a href="#cb238-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC2 =</span> gof_pca<span class="sc">$</span>x[, <span class="dv">2</span>]</span>
-<span id="cb238-5"><a href="#cb238-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb225"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb225-1"><a href="#cb225-1" aria-hidden="true" tabindex="-1"></a>gof_pca_simulations <span class="ot">=</span> <span class="fu">tibble</span>(</span>
+<span id="cb225-2"><a href="#cb225-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">origin =</span> gof_simulations<span class="sc">$</span>origin,</span>
+<span id="cb225-3"><a href="#cb225-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC1 =</span> gof_pca<span class="sc">$</span>x[, <span class="dv">1</span>],</span>
+<span id="cb225-4"><a href="#cb225-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC2 =</span> gof_pca<span class="sc">$</span>x[, <span class="dv">2</span>]</span>
+<span id="cb225-5"><a href="#cb225-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb239"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb239-1"><a href="#cb239-1" aria-hidden="true" tabindex="-1"></a>gof_pca_observed <span class="ot">=</span> <span class="fu">tibble</span>(</span>
-<span id="cb239-2"><a href="#cb239-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC1 =</span> gof_observed_coordinates[<span class="dv">1</span>, <span class="st">&quot;PC1&quot;</span>],</span>
-<span id="cb239-3"><a href="#cb239-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC2 =</span> gof_observed_coordinates[<span class="dv">1</span>, <span class="st">&quot;PC2&quot;</span>]</span>
-<span id="cb239-4"><a href="#cb239-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb226"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb226-1"><a href="#cb226-1" aria-hidden="true" tabindex="-1"></a>gof_pca_observed <span class="ot">=</span> <span class="fu">tibble</span>(</span>
+<span id="cb226-2"><a href="#cb226-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC1 =</span> gof_observed_coordinates[<span class="dv">1</span>, <span class="st">&quot;PC1&quot;</span>],</span>
+<span id="cb226-3"><a href="#cb226-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC2 =</span> gof_observed_coordinates[<span class="dv">1</span>, <span class="st">&quot;PC2&quot;</span>]</span>
+<span id="cb226-4"><a href="#cb226-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>We plot the simulated points first, then the observation. The larger black point is the observation; drawing it last keeps it visible.</p>
 <p>Plot the first two components:</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb240"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb240-1"><a href="#cb240-1" aria-hidden="true" tabindex="-1"></a>plot_gof_pca <span class="ot">=</span> <span class="fu">ggplot</span>(</span>
-<span id="cb240-2"><a href="#cb240-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(gof_pca_simulations, origin),</span>
-<span id="cb240-3"><a href="#cb240-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> origin)</span>
-<span id="cb240-4"><a href="#cb240-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
-<span id="cb240-5"><a href="#cb240-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">size =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb240-6"><a href="#cb240-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
-<span id="cb240-7"><a href="#cb240-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> gof_pca_observed,</span>
-<span id="cb240-8"><a href="#cb240-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2),</span>
-<span id="cb240-9"><a href="#cb240-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>, <span class="at">size =</span> <span class="fl">2.1</span></span>
-<span id="cb240-10"><a href="#cb240-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb240-11"><a href="#cb240-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(</span>
-<span id="cb240-12"><a href="#cb240-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="at">prior_predictive =</span> <span class="st">&quot;grey70&quot;</span>, <span class="at">posterior_predictive =</span> <span class="st">&quot;#40E0D0&quot;</span>),</span>
-<span id="cb240-13"><a href="#cb240-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="at">prior_predictive =</span> <span class="st">&quot;Prior predictive&quot;</span>,</span>
-<span id="cb240-14"><a href="#cb240-14" aria-hidden="true" tabindex="-1"></a>               <span class="at">posterior_predictive =</span> <span class="st">&quot;Posterior predictive&quot;</span>)</span>
-<span id="cb240-15"><a href="#cb240-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb240-16"><a href="#cb240-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb240-17"><a href="#cb240-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">paste0</span>(<span class="st">&quot;PC1 (&quot;</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gof_pca_variance[<span class="dv">1</span>], <span class="dv">1</span>), <span class="st">&quot;%)&quot;</span>),</span>
-<span id="cb240-18"><a href="#cb240-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">paste0</span>(<span class="st">&quot;PC2 (&quot;</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gof_pca_variance[<span class="dv">2</span>], <span class="dv">1</span>), <span class="st">&quot;%)&quot;</span>),</span>
-<span id="cb240-19"><a href="#cb240-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="cn">NULL</span></span>
-<span id="cb240-20"><a href="#cb240-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb240-21"><a href="#cb240-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
-<span id="cb240-22"><a href="#cb240-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb227"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb227-1"><a href="#cb227-1" aria-hidden="true" tabindex="-1"></a>plot_gof_pca <span class="ot">=</span> <span class="fu">ggplot</span>(</span>
+<span id="cb227-2"><a href="#cb227-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(gof_pca_simulations, origin),</span>
+<span id="cb227-3"><a href="#cb227-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> origin)</span>
+<span id="cb227-4"><a href="#cb227-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb227-5"><a href="#cb227-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">size =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb227-6"><a href="#cb227-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb227-7"><a href="#cb227-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> gof_pca_observed,</span>
+<span id="cb227-8"><a href="#cb227-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2),</span>
+<span id="cb227-9"><a href="#cb227-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>, <span class="at">size =</span> <span class="fl">2.1</span></span>
+<span id="cb227-10"><a href="#cb227-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb227-11"><a href="#cb227-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(</span>
+<span id="cb227-12"><a href="#cb227-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="at">prior_predictive =</span> <span class="st">&quot;grey70&quot;</span>, <span class="at">posterior_predictive =</span> <span class="st">&quot;#40E0D0&quot;</span>),</span>
+<span id="cb227-13"><a href="#cb227-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="at">prior_predictive =</span> <span class="st">&quot;Prior predictive&quot;</span>,</span>
+<span id="cb227-14"><a href="#cb227-14" aria-hidden="true" tabindex="-1"></a>               <span class="at">posterior_predictive =</span> <span class="st">&quot;Posterior predictive&quot;</span>)</span>
+<span id="cb227-15"><a href="#cb227-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb227-16"><a href="#cb227-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb227-17"><a href="#cb227-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">paste0</span>(<span class="st">&quot;PC1 (&quot;</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gof_pca_variance[<span class="dv">1</span>], <span class="dv">1</span>), <span class="st">&quot;%)&quot;</span>),</span>
+<span id="cb227-18"><a href="#cb227-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">paste0</span>(<span class="st">&quot;PC2 (&quot;</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gof_pca_variance[<span class="dv">2</span>], <span class="dv">1</span>), <span class="st">&quot;%)&quot;</span>),</span>
+<span id="cb227-19"><a href="#cb227-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="cn">NULL</span></span>
+<span id="cb227-20"><a href="#cb227-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb227-21"><a href="#cb227-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb227-22"><a href="#cb227-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb241"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb241-1"><a href="#cb241-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(plot_gof_pca)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb228"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb228-1"><a href="#cb228-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(plot_gof_pca)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -5699,24 +5445,24 @@ Check your answer
 <p>Before drawing a conclusion, look at how much variation the axes capture. The scree plot shows the contribution of each component.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb242"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb242-1"><a href="#cb242-1" aria-hidden="true" tabindex="-1"></a>plot_gof_scree <span class="ot">=</span> <span class="fu">ggplot</span>(</span>
-<span id="cb242-2"><a href="#cb242-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb242-3"><a href="#cb242-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">component =</span> <span class="fu">seq_along</span>(gof_pca_variance),</span>
-<span id="cb242-4"><a href="#cb242-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">percent =</span> <span class="dv">100</span> <span class="sc">*</span> gof_pca_variance</span>
-<span id="cb242-5"><a href="#cb242-5" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb242-6"><a href="#cb242-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> component, <span class="at">y =</span> percent)</span>
-<span id="cb242-7"><a href="#cb242-7" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
-<span id="cb242-8"><a href="#cb242-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">&quot;grey55&quot;</span>, <span class="at">width =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
-<span id="cb242-9"><a href="#cb242-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb242-10"><a href="#cb242-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb242-11"><a href="#cb242-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Principal component&quot;</span>,</span>
-<span id="cb242-12"><a href="#cb242-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Variance explained (%)&quot;</span></span>
-<span id="cb242-13"><a href="#cb242-13" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb229"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb229-1"><a href="#cb229-1" aria-hidden="true" tabindex="-1"></a>plot_gof_scree <span class="ot">=</span> <span class="fu">ggplot</span>(</span>
+<span id="cb229-2"><a href="#cb229-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb229-3"><a href="#cb229-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">component =</span> <span class="fu">seq_along</span>(gof_pca_variance),</span>
+<span id="cb229-4"><a href="#cb229-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">percent =</span> <span class="dv">100</span> <span class="sc">*</span> gof_pca_variance</span>
+<span id="cb229-5"><a href="#cb229-5" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb229-6"><a href="#cb229-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> component, <span class="at">y =</span> percent)</span>
+<span id="cb229-7"><a href="#cb229-7" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb229-8"><a href="#cb229-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">&quot;grey55&quot;</span>, <span class="at">width =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb229-9"><a href="#cb229-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb229-10"><a href="#cb229-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb229-11"><a href="#cb229-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Principal component&quot;</span>,</span>
+<span id="cb229-12"><a href="#cb229-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Variance explained (%)&quot;</span></span>
+<span id="cb229-13"><a href="#cb229-13" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb243"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb243-1"><a href="#cb243-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(plot_gof_scree)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb230"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb230-1"><a href="#cb230-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(plot_gof_scree)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -5758,17 +5504,17 @@ Check your answer
 <p>Read the monolocus reference table:</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb244"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb244-1"><a href="#cb244-1" aria-hidden="true" tabindex="-1"></a>barriers_ss <span class="ot">=</span> <span class="fu">read.table</span>(</span>
-<span id="cb244-2"><a href="#cb244-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;data/locus_model_choice_data.tsv&quot;</span>,</span>
-<span id="cb244-3"><a href="#cb244-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">header =</span> <span class="cn">TRUE</span></span>
-<span id="cb244-4"><a href="#cb244-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
-<span id="cb244-5"><a href="#cb244-5" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb231"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb231-1"><a href="#cb231-1" aria-hidden="true" tabindex="-1"></a>barriers_ss <span class="ot">=</span> <span class="fu">read.table</span>(</span>
+<span id="cb231-2"><a href="#cb231-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;data/locus_model_choice_data.tsv&quot;</span>,</span>
+<span id="cb231-3"><a href="#cb231-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">header =</span> <span class="cn">TRUE</span></span>
+<span id="cb231-4"><a href="#cb231-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb231-5"><a href="#cb231-5" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Take a look at the rows before preparing the forest.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb245"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb245-1"><a href="#cb245-1" aria-hidden="true" tabindex="-1"></a>barriers_ss</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb232"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb232-1"><a href="#cb232-1" aria-hidden="true" tabindex="-1"></a>barriers_ss</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 21,157 × 29
    origin     fitted_model dataset_id locus_id true_class row_in_source bialsites_avg sf_avg sxA_avg sxB_avg  ss_avg successive_ss_avg piA_avg piB_avg
@@ -5792,7 +5538,7 @@ Check your answer
 <p>Which columns describe the origin of a row, and which contain genetic statistics?</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb247"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb247-1"><a href="#cb247-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(barriers_ss)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb234"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb234-1"><a href="#cb234-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(barriers_ss)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] &quot;origin&quot;            &quot;fitted_model&quot;      &quot;dataset_id&quot;        &quot;locus_id&quot;          &quot;true_class&quot;        &quot;row_in_source&quot;     &quot;bialsites_avg&quot;    
  [8] &quot;sf_avg&quot;            &quot;sxA_avg&quot;           &quot;sxB_avg&quot;           &quot;ss_avg&quot;            &quot;successive_ss_avg&quot; &quot;piA_avg&quot;           &quot;piB_avg&quot;          
@@ -5805,8 +5551,8 @@ Check your answer
 <p>How many simulated and observed loci are available?</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb249"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb249-1"><a href="#cb249-1" aria-hidden="true" tabindex="-1"></a>barriers_ss <span class="sc">%&gt;%</span></span>
-<span id="cb249-2"><a href="#cb249-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>(origin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb236"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb236-1"><a href="#cb236-1" aria-hidden="true" tabindex="-1"></a>barriers_ss <span class="sc">%&gt;%</span></span>
+<span id="cb236-2"><a href="#cb236-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>(origin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 2
   origin                 n
@@ -5827,52 +5573,52 @@ Check your answer
 <p>Store their names:</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb251"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb251-1"><a href="#cb251-1" aria-hidden="true" tabindex="-1"></a>barrier_statistics <span class="ot">=</span> <span class="fu">c</span>(</span>
-<span id="cb251-2"><a href="#cb251-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;bialsites_avg&quot;</span>,</span>
-<span id="cb251-3"><a href="#cb251-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;sf_avg&quot;</span>,</span>
-<span id="cb251-4"><a href="#cb251-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;sxA_avg&quot;</span>,</span>
-<span id="cb251-5"><a href="#cb251-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;sxB_avg&quot;</span>,</span>
-<span id="cb251-6"><a href="#cb251-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;ss_avg&quot;</span>,</span>
-<span id="cb251-7"><a href="#cb251-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;piA_avg&quot;</span>,</span>
-<span id="cb251-8"><a href="#cb251-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;piB_avg&quot;</span>,</span>
-<span id="cb251-9"><a href="#cb251-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;thetaA_avg&quot;</span>,</span>
-<span id="cb251-10"><a href="#cb251-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;thetaB_avg&quot;</span>,</span>
-<span id="cb251-11"><a href="#cb251-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;DtajA_avg&quot;</span>,</span>
-<span id="cb251-12"><a href="#cb251-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;DtajB_avg&quot;</span>,</span>
-<span id="cb251-13"><a href="#cb251-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;divAB_avg&quot;</span>,</span>
-<span id="cb251-14"><a href="#cb251-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;netdivAB_avg&quot;</span>,</span>
-<span id="cb251-15"><a href="#cb251-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;FST_avg&quot;</span></span>
-<span id="cb251-16"><a href="#cb251-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb238"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb238-1"><a href="#cb238-1" aria-hidden="true" tabindex="-1"></a>barrier_statistics <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb238-2"><a href="#cb238-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;bialsites_avg&quot;</span>,</span>
+<span id="cb238-3"><a href="#cb238-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;sf_avg&quot;</span>,</span>
+<span id="cb238-4"><a href="#cb238-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;sxA_avg&quot;</span>,</span>
+<span id="cb238-5"><a href="#cb238-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;sxB_avg&quot;</span>,</span>
+<span id="cb238-6"><a href="#cb238-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;ss_avg&quot;</span>,</span>
+<span id="cb238-7"><a href="#cb238-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;piA_avg&quot;</span>,</span>
+<span id="cb238-8"><a href="#cb238-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;piB_avg&quot;</span>,</span>
+<span id="cb238-9"><a href="#cb238-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;thetaA_avg&quot;</span>,</span>
+<span id="cb238-10"><a href="#cb238-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;thetaB_avg&quot;</span>,</span>
+<span id="cb238-11"><a href="#cb238-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;DtajA_avg&quot;</span>,</span>
+<span id="cb238-12"><a href="#cb238-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;DtajB_avg&quot;</span>,</span>
+<span id="cb238-13"><a href="#cb238-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;divAB_avg&quot;</span>,</span>
+<span id="cb238-14"><a href="#cb238-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;netdivAB_avg&quot;</span>,</span>
+<span id="cb238-15"><a href="#cb238-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;FST_avg&quot;</span></span>
+<span id="cb238-16"><a href="#cb238-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Keep the observed rows, including their locus identifiers so that we can find them again later.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb252"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb252-1"><a href="#cb252-1" aria-hidden="true" tabindex="-1"></a>barriers_observed <span class="ot">=</span> barriers_ss <span class="sc">%&gt;%</span></span>
-<span id="cb252-2"><a href="#cb252-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(origin <span class="sc">==</span> <span class="st">&quot;observed_locus&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb239"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb239-1"><a href="#cb239-1" aria-hidden="true" tabindex="-1"></a>barriers_observed <span class="ot">=</span> barriers_ss <span class="sc">%&gt;%</span></span>
+<span id="cb239-2"><a href="#cb239-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(origin <span class="sc">==</span> <span class="st">&quot;observed_locus&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Prepare the training examples with their known classes.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb253"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb253-1"><a href="#cb253-1" aria-hidden="true" tabindex="-1"></a>barriers_training <span class="ot">=</span> barriers_ss <span class="sc">%&gt;%</span></span>
-<span id="cb253-2"><a href="#cb253-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
-<span id="cb253-3"><a href="#cb253-3" aria-hidden="true" tabindex="-1"></a>    origin <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;training_isolation&quot;</span>, <span class="st">&quot;training_migration&quot;</span>)</span>
-<span id="cb253-4"><a href="#cb253-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb253-5"><a href="#cb253-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(true_class, dplyr<span class="sc">::</span><span class="fu">all_of</span>(barrier_statistics)) <span class="sc">%&gt;%</span></span>
-<span id="cb253-6"><a href="#cb253-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb253-7"><a href="#cb253-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">true_class =</span> <span class="fu">factor</span>(</span>
-<span id="cb253-8"><a href="#cb253-8" aria-hidden="true" tabindex="-1"></a>      true_class,</span>
-<span id="cb253-9"><a href="#cb253-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;migration&quot;</span>, <span class="st">&quot;isolation&quot;</span>)</span>
-<span id="cb253-10"><a href="#cb253-10" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb253-11"><a href="#cb253-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb240"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb240-1"><a href="#cb240-1" aria-hidden="true" tabindex="-1"></a>barriers_training <span class="ot">=</span> barriers_ss <span class="sc">%&gt;%</span></span>
+<span id="cb240-2"><a href="#cb240-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb240-3"><a href="#cb240-3" aria-hidden="true" tabindex="-1"></a>    origin <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;training_isolation&quot;</span>, <span class="st">&quot;training_migration&quot;</span>)</span>
+<span id="cb240-4"><a href="#cb240-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb240-5"><a href="#cb240-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(true_class, dplyr<span class="sc">::</span><span class="fu">all_of</span>(barrier_statistics)) <span class="sc">%&gt;%</span></span>
+<span id="cb240-6"><a href="#cb240-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb240-7"><a href="#cb240-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">true_class =</span> <span class="fu">factor</span>(</span>
+<span id="cb240-8"><a href="#cb240-8" aria-hidden="true" tabindex="-1"></a>      true_class,</span>
+<span id="cb240-9"><a href="#cb240-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;migration&quot;</span>, <span class="st">&quot;isolation&quot;</span>)</span>
+<span id="cb240-10"><a href="#cb240-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb240-11"><a href="#cb240-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Give the observed loci the same predictor columns.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb254"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb254-1"><a href="#cb254-1" aria-hidden="true" tabindex="-1"></a>barriers_observed_predictors <span class="ot">=</span> barriers_observed <span class="sc">%&gt;%</span></span>
-<span id="cb254-2"><a href="#cb254-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(barrier_statistics))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb241"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb241-1"><a href="#cb241-1" aria-hidden="true" tabindex="-1"></a>barriers_observed_predictors <span class="ot">=</span> barriers_observed <span class="sc">%&gt;%</span></span>
+<span id="cb241-2"><a href="#cb241-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(barrier_statistics))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </section>
@@ -5881,24 +5627,24 @@ Check your answer
 <p>The method should now be familiar. We train a classification forest, but each example is an individual locus rather than a multilocus dataset.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb255"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb255-1"><a href="#cb255-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20260915</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb242"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb242-1"><a href="#cb242-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20260915</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center" data-cache.extra="[[20000,15],[&quot;true_class&quot;,&quot;bialsites_avg&quot;,&quot;sf_avg&quot;,&quot;sxA_avg&quot;,&quot;sxB_avg&quot;,&quot;ss_avg&quot;,&quot;piA_avg&quot;,&quot;piB_avg&quot;,&quot;thetaA_avg&quot;,&quot;thetaB_avg&quot;,&quot;DtajA_avg&quot;,&quot;DtajB_avg&quot;,&quot;divAB_avg&quot;,&quot;netdivAB_avg&quot;,&quot;FST_avg&quot;],&quot;2026-09-10 10:10:23&quot;]">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb256"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb256-1"><a href="#cb256-1" aria-hidden="true" tabindex="-1"></a>barrier_forest <span class="ot">=</span> <span class="fu">abcrf</span>(</span>
-<span id="cb256-2"><a href="#cb256-2" aria-hidden="true" tabindex="-1"></a>  true_class <span class="sc">~</span> .,</span>
-<span id="cb256-3"><a href="#cb256-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">as.data.frame</span>(barriers_training),</span>
-<span id="cb256-4"><a href="#cb256-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">ntree =</span> <span class="dv">500</span>,</span>
-<span id="cb256-5"><a href="#cb256-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">paral =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb256-6"><a href="#cb256-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ncores =</span> <span class="dv">1</span></span>
-<span id="cb256-7"><a href="#cb256-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb243"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb243-1"><a href="#cb243-1" aria-hidden="true" tabindex="-1"></a>barrier_forest <span class="ot">=</span> <span class="fu">abcrf</span>(</span>
+<span id="cb243-2"><a href="#cb243-2" aria-hidden="true" tabindex="-1"></a>  true_class <span class="sc">~</span> .,</span>
+<span id="cb243-3"><a href="#cb243-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">as.data.frame</span>(barriers_training),</span>
+<span id="cb243-4"><a href="#cb243-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">ntree =</span> <span class="dv">500</span>,</span>
+<span id="cb243-5"><a href="#cb243-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">paral =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb243-6"><a href="#cb243-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ncores =</span> <span class="dv">1</span></span>
+<span id="cb243-7"><a href="#cb243-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>How well does it distinguish the two simulated histories?</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb257"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb257-1"><a href="#cb257-1" aria-hidden="true" tabindex="-1"></a>barrier_forest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb244"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb244-1"><a href="#cb244-1" aria-hidden="true" tabindex="-1"></a>barrier_forest</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -5932,36 +5678,36 @@ Check your answer
 <p>We can apply this one forest to all 1,157 observed loci. Each receives an allocation and an estimated probability for that allocation.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb259"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb259-1"><a href="#cb259-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20260915</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb246"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb246-1"><a href="#cb246-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20260915</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Classify the observed loci:</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center" data-cache.extra="[[20000,15],[&quot;true_class&quot;,&quot;bialsites_avg&quot;,&quot;sf_avg&quot;,&quot;sxA_avg&quot;,&quot;sxB_avg&quot;,&quot;ss_avg&quot;,&quot;piA_avg&quot;,&quot;piB_avg&quot;,&quot;thetaA_avg&quot;,&quot;thetaB_avg&quot;,&quot;DtajA_avg&quot;,&quot;DtajB_avg&quot;,&quot;divAB_avg&quot;,&quot;netdivAB_avg&quot;,&quot;FST_avg&quot;],[1157,14],[&quot;bialsites_avg&quot;,&quot;sf_avg&quot;,&quot;sxA_avg&quot;,&quot;sxB_avg&quot;,&quot;ss_avg&quot;,&quot;piA_avg&quot;,&quot;piB_avg&quot;,&quot;thetaA_avg&quot;,&quot;thetaB_avg&quot;,&quot;DtajA_avg&quot;,&quot;DtajB_avg&quot;,&quot;divAB_avg&quot;,&quot;netdivAB_avg&quot;,&quot;FST_avg&quot;],&quot;2026-09-10 10:10:23&quot;]">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb260"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb260-1"><a href="#cb260-1" aria-hidden="true" tabindex="-1"></a>locus_specific_modComp <span class="ot">=</span> <span class="fu">predict</span>(</span>
-<span id="cb260-2"><a href="#cb260-2" aria-hidden="true" tabindex="-1"></a>  barrier_forest,</span>
-<span id="cb260-3"><a href="#cb260-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">obs =</span> <span class="fu">as.data.frame</span>(barriers_observed_predictors),</span>
-<span id="cb260-4"><a href="#cb260-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">training =</span> <span class="fu">as.data.frame</span>(barriers_training),</span>
-<span id="cb260-5"><a href="#cb260-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ntree =</span> <span class="dv">500</span>,</span>
-<span id="cb260-6"><a href="#cb260-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">paral =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb260-7"><a href="#cb260-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ncores =</span> <span class="dv">1</span></span>
-<span id="cb260-8"><a href="#cb260-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb247"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb247-1"><a href="#cb247-1" aria-hidden="true" tabindex="-1"></a>locus_specific_modComp <span class="ot">=</span> <span class="fu">predict</span>(</span>
+<span id="cb247-2"><a href="#cb247-2" aria-hidden="true" tabindex="-1"></a>  barrier_forest,</span>
+<span id="cb247-3"><a href="#cb247-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">obs =</span> <span class="fu">as.data.frame</span>(barriers_observed_predictors),</span>
+<span id="cb247-4"><a href="#cb247-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">training =</span> <span class="fu">as.data.frame</span>(barriers_training),</span>
+<span id="cb247-5"><a href="#cb247-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ntree =</span> <span class="dv">500</span>,</span>
+<span id="cb247-6"><a href="#cb247-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">paral =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb247-7"><a href="#cb247-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ncores =</span> <span class="dv">1</span></span>
+<span id="cb247-8"><a href="#cb247-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>The returned object contains the predictions. Put them in a tibble alongside the locus identifiers, so that we can work with them easily.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb261"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb261-1"><a href="#cb261-1" aria-hidden="true" tabindex="-1"></a>barrier_results <span class="ot">=</span> <span class="fu">tibble</span>(</span>
-<span id="cb261-2"><a href="#cb261-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">locus_id =</span> barriers_observed<span class="sc">$</span>locus_id,</span>
-<span id="cb261-3"><a href="#cb261-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">model =</span> <span class="fu">as.character</span>(locus_specific_modComp<span class="sc">$</span>allocation),</span>
-<span id="cb261-4"><a href="#cb261-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">proba =</span> <span class="fu">as.numeric</span>(locus_specific_modComp<span class="sc">$</span>post.prob)</span>
-<span id="cb261-5"><a href="#cb261-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb248"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb248-1"><a href="#cb248-1" aria-hidden="true" tabindex="-1"></a>barrier_results <span class="ot">=</span> <span class="fu">tibble</span>(</span>
+<span id="cb248-2"><a href="#cb248-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">locus_id =</span> barriers_observed<span class="sc">$</span>locus_id,</span>
+<span id="cb248-3"><a href="#cb248-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">model =</span> <span class="fu">as.character</span>(locus_specific_modComp<span class="sc">$</span>allocation),</span>
+<span id="cb248-4"><a href="#cb248-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">proba =</span> <span class="fu">as.numeric</span>(locus_specific_modComp<span class="sc">$</span>post.prob)</span>
+<span id="cb248-5"><a href="#cb248-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Look at a few loci. Are all their allocations supported equally strongly?</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb262"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb262-1"><a href="#cb262-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(barrier_results, <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb249"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb249-1"><a href="#cb249-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(barrier_results, <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 12 × 3
    locus_id             model     proba
@@ -5988,17 +5734,17 @@ Check your answer
 <p>How many loci fall into each group? Count the allocations and express them as percentages.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb264"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb264-1"><a href="#cb264-1" aria-hidden="true" tabindex="-1"></a>barrier_counts <span class="ot">=</span> barrier_results <span class="sc">%&gt;%</span></span>
-<span id="cb264-2"><a href="#cb264-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>(model) <span class="sc">%&gt;%</span></span>
-<span id="cb264-3"><a href="#cb264-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb264-4"><a href="#cb264-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">percentage =</span> <span class="dv">100</span> <span class="sc">*</span> n <span class="sc">/</span> <span class="fu">sum</span>(n)</span>
-<span id="cb264-5"><a href="#cb264-5" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb251"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb251-1"><a href="#cb251-1" aria-hidden="true" tabindex="-1"></a>barrier_counts <span class="ot">=</span> barrier_results <span class="sc">%&gt;%</span></span>
+<span id="cb251-2"><a href="#cb251-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>(model) <span class="sc">%&gt;%</span></span>
+<span id="cb251-3"><a href="#cb251-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb251-4"><a href="#cb251-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">percentage =</span> <span class="dv">100</span> <span class="sc">*</span> n <span class="sc">/</span> <span class="fu">sum</span>(n)</span>
+<span id="cb251-5"><a href="#cb251-5" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Look at the balance between the two groups:</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb265"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb265-1"><a href="#cb265-1" aria-hidden="true" tabindex="-1"></a>barrier_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb252"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb252-1"><a href="#cb252-1" aria-hidden="true" tabindex="-1"></a>barrier_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 3
   model         n percentage
@@ -6023,49 +5769,49 @@ Check your answer
 <p>Join by <code>locus_id</code> so that every prediction remains associated with the correct locus.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb267"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb267-1"><a href="#cb267-1" aria-hidden="true" tabindex="-1"></a>barrier_results_ss <span class="ot">=</span> barrier_results <span class="sc">%&gt;%</span></span>
-<span id="cb267-2"><a href="#cb267-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
-<span id="cb267-3"><a href="#cb267-3" aria-hidden="true" tabindex="-1"></a>    barriers_observed <span class="sc">%&gt;%</span></span>
-<span id="cb267-4"><a href="#cb267-4" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
-<span id="cb267-5"><a href="#cb267-5" aria-hidden="true" tabindex="-1"></a>        locus_id,</span>
-<span id="cb267-6"><a href="#cb267-6" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">all_of</span>(barrier_statistics)</span>
-<span id="cb267-7"><a href="#cb267-7" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb267-8"><a href="#cb267-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">&quot;locus_id&quot;</span></span>
-<span id="cb267-9"><a href="#cb267-9" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb254"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb254-1"><a href="#cb254-1" aria-hidden="true" tabindex="-1"></a>barrier_results_ss <span class="ot">=</span> barrier_results <span class="sc">%&gt;%</span></span>
+<span id="cb254-2"><a href="#cb254-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb254-3"><a href="#cb254-3" aria-hidden="true" tabindex="-1"></a>    barriers_observed <span class="sc">%&gt;%</span></span>
+<span id="cb254-4"><a href="#cb254-4" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb254-5"><a href="#cb254-5" aria-hidden="true" tabindex="-1"></a>        locus_id,</span>
+<span id="cb254-6"><a href="#cb254-6" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">all_of</span>(barrier_statistics)</span>
+<span id="cb254-7"><a href="#cb254-7" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb254-8"><a href="#cb254-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">&quot;locus_id&quot;</span></span>
+<span id="cb254-9"><a href="#cb254-9" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>For each locus, calculate the average of the two within-population diversity values.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb268"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb268-1"><a href="#cb268-1" aria-hidden="true" tabindex="-1"></a>barrier_results_ss <span class="ot">=</span> barrier_results_ss <span class="sc">%&gt;%</span></span>
-<span id="cb268-2"><a href="#cb268-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb268-3"><a href="#cb268-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_pi =</span> (piA_avg <span class="sc">+</span> piB_avg) <span class="sc">/</span> <span class="dv">2</span></span>
-<span id="cb268-4"><a href="#cb268-4" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb255"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb255-1"><a href="#cb255-1" aria-hidden="true" tabindex="-1"></a>barrier_results_ss <span class="ot">=</span> barrier_results_ss <span class="sc">%&gt;%</span></span>
+<span id="cb255-2"><a href="#cb255-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb255-3"><a href="#cb255-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_pi =</span> (piA_avg <span class="sc">+</span> piB_avg) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb255-4"><a href="#cb255-4" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>This averages diversity in A and B; it does not pool the two populations into one sample.</p>
 <p>Plot this average against shared polymorphism, using the inferred class to colour the loci.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb269"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb269-1"><a href="#cb269-1" aria-hidden="true" tabindex="-1"></a>plot_barrier_statistics <span class="ot">=</span> <span class="fu">ggplot</span>(</span>
-<span id="cb269-2"><a href="#cb269-2" aria-hidden="true" tabindex="-1"></a>  barrier_results_ss, <span class="fu">aes</span>(<span class="at">x =</span> mean_pi, <span class="at">y =</span> ss_avg, <span class="at">colour =</span> model)</span>
-<span id="cb269-3"><a href="#cb269-3" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
-<span id="cb269-4"><a href="#cb269-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.45</span>, <span class="at">size =</span> <span class="fl">1.3</span>) <span class="sc">+</span></span>
-<span id="cb269-5"><a href="#cb269-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(</span>
-<span id="cb269-6"><a href="#cb269-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="at">migration =</span> <span class="st">&quot;#1BA39C&quot;</span>, <span class="at">isolation =</span> <span class="st">&quot;#E67E22&quot;</span>),</span>
-<span id="cb269-7"><a href="#cb269-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">&quot;migration&quot;</span>, <span class="st">&quot;isolation&quot;</span>)</span>
-<span id="cb269-8"><a href="#cb269-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb269-9"><a href="#cb269-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb269-10"><a href="#cb269-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Mean nucleotide diversity across populations&quot;</span>,</span>
-<span id="cb269-11"><a href="#cb269-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Shared polymorphisms&quot;</span>,</span>
-<span id="cb269-12"><a href="#cb269-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">&quot;Selected locus model&quot;</span></span>
-<span id="cb269-13"><a href="#cb269-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb269-14"><a href="#cb269-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb256"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb256-1"><a href="#cb256-1" aria-hidden="true" tabindex="-1"></a>plot_barrier_statistics <span class="ot">=</span> <span class="fu">ggplot</span>(</span>
+<span id="cb256-2"><a href="#cb256-2" aria-hidden="true" tabindex="-1"></a>  barrier_results_ss, <span class="fu">aes</span>(<span class="at">x =</span> mean_pi, <span class="at">y =</span> ss_avg, <span class="at">colour =</span> model)</span>
+<span id="cb256-3"><a href="#cb256-3" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb256-4"><a href="#cb256-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.45</span>, <span class="at">size =</span> <span class="fl">1.3</span>) <span class="sc">+</span></span>
+<span id="cb256-5"><a href="#cb256-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(</span>
+<span id="cb256-6"><a href="#cb256-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="at">migration =</span> <span class="st">&quot;#1BA39C&quot;</span>, <span class="at">isolation =</span> <span class="st">&quot;#E67E22&quot;</span>),</span>
+<span id="cb256-7"><a href="#cb256-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">&quot;migration&quot;</span>, <span class="st">&quot;isolation&quot;</span>)</span>
+<span id="cb256-8"><a href="#cb256-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb256-9"><a href="#cb256-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb256-10"><a href="#cb256-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Mean nucleotide diversity across populations&quot;</span>,</span>
+<span id="cb256-11"><a href="#cb256-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Shared polymorphisms&quot;</span>,</span>
+<span id="cb256-12"><a href="#cb256-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">&quot;Selected locus model&quot;</span></span>
+<span id="cb256-13"><a href="#cb256-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb256-14"><a href="#cb256-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb270"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb270-1"><a href="#cb270-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(plot_barrier_statistics)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb257"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb257-1"><a href="#cb257-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(plot_barrier_statistics)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -6090,19 +5836,19 @@ Check your answer
 <p>Save the table if you want to return to particular loci after the workshop.</p>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb271"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb271-1"><a href="#cb271-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(</span>
-<span id="cb271-2"><a href="#cb271-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;results/locus_model_choice&quot;</span>,</span>
-<span id="cb271-3"><a href="#cb271-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">recursive =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb271-4"><a href="#cb271-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">showWarnings =</span> <span class="cn">FALSE</span></span>
-<span id="cb271-5"><a href="#cb271-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb258"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb258-1"><a href="#cb258-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(</span>
+<span id="cb258-2"><a href="#cb258-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;results/locus_model_choice&quot;</span>,</span>
+<span id="cb258-3"><a href="#cb258-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">recursive =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb258-4"><a href="#cb258-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">showWarnings =</span> <span class="cn">FALSE</span></span>
+<span id="cb258-5"><a href="#cb258-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="exercise">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb272"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb272-1"><a href="#cb272-1" aria-hidden="true" tabindex="-1"></a>readr<span class="sc">::</span><span class="fu">write_tsv</span>(</span>
-<span id="cb272-2"><a href="#cb272-2" aria-hidden="true" tabindex="-1"></a>  barrier_results_ss,</span>
-<span id="cb272-3"><a href="#cb272-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;results/locus_model_choice/workshop_locus_results.tsv&quot;</span></span>
-<span id="cb272-4"><a href="#cb272-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb259"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb259-1"><a href="#cb259-1" aria-hidden="true" tabindex="-1"></a>readr<span class="sc">::</span><span class="fu">write_tsv</span>(</span>
+<span id="cb259-2"><a href="#cb259-2" aria-hidden="true" tabindex="-1"></a>  barrier_results_ss,</span>
+<span id="cb259-3"><a href="#cb259-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;results/locus_model_choice/workshop_locus_results.tsv&quot;</span></span>
+<span id="cb259-4"><a href="#cb259-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Try another pair of statistics, such as <code>FST_avg</code> and <code>netdivAB_avg</code>. Which patterns become easier to see?</p>
