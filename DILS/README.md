@@ -1,30 +1,42 @@
-# DILS (Day 1)
+# DILS practical: from dice to demographic histories
 
-Hands-on ABC random forests for two-population DILS. Simulations are already done. You will not run `ms`, Snakemake, or the original DILS pipeline.
+Which model could have produced our observations? We start with dice to explore how simulations help us compare competing explanations. We then apply the same approach to two mussel species, *Mytilus edulis* and *Mytilus galloprovincialis*: did they exchange genes, when did this happen, and did all parts of their genomes respond in the same way?
 
-Slides are the main teaching material. This folder is the working copy for the R scripts.
+The practical combines short explanations, R exercises and questions to discuss. We will compare models, estimate parameters, check whether the selected model reproduces the observations, and identify candidate barrier loci.
 
-## How to work
+Download this folder, keeping `workshop.html` and `data/` together. Open `workshop.html` in your browser and run the R code from the `DILS/` directory. Download the HTML file before opening it: the GitHub file viewer does not display the practical as a webpage.
 
-1. Change to this directory (`DILS/`).
-2. Start with `scripts/00_check_setup.R`.
-3. Open and complete `scripts/01_...` through `scripts/10_...` in order.
-4. Do not source or run all scripts at once.
-5. Outputs are written to a local `results/` folder (created as needed).
-6. Work in your own writable copy of the repository. Do not share a single results directory.
-
-In RStudio you can open `DILS_workshop.Rproj` so the working directory is this folder.
-
-Assignments in R use `=`, not `<-`.
-
-## Packages
-
-Install:
+## R packages
 
 ```r
-install.packages(c("tidyverse", "abcrf"))
+install.packages(c(
+  "tidyverse",
+  "abcrf",
+  "ggdensity",
+  "ggthemes",
+  "knitr",
+  "scales"
+))
 ```
 
-`ranger` is pulled in by `abcrf`.
+- **tidyverse**: reading and manipulating tables, and plotting.
+- **abcrf**: model comparison and parameter estimation using random forests.
+- **ggdensity**, **ggthemes** and **scales**: additional plotting tools.
+- **knitr**: formatting the parameter estimates as a table.
 
-See the repository root `README.md` for tested versus required versions. Exact random-forest results can change with R, `abcrf`, `ranger`, the seed, and parallelism. Workshop forests use 500 trees (`n_trees` in `R/helpers.R`).
+The demographic simulations are already provided. No simulator or Quarto installation is needed to follow the practical.
+
+## Contents
+
+Introduction, followed by a first exercise: **Before Mytilus: which die was drawn?**
+
+1. Explore the data
+2. Is there ongoing gene flow?
+3. When did gene flow occur?
+4. Does effective population size vary across the genome?
+5. Does migration vary across the genome?
+6. Putting the model choices together
+7. Estimating effective population size, followed by estimates for all parameters
+8. Can the selected model reproduce the data?
+9. Looking at the joint pattern
+10. Which loci resist gene flow?
