@@ -1,6 +1,5 @@
 import os
 import argparse
-from Bio import SeqIO
 
 def read_fasta(alignment):
     with open(alignment) as filein:
